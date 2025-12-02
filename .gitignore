@@ -1,0 +1,17 @@
+# S32DS Build Artifacts (컴파일 결과물 무시)
+Debug/
+Debug_FLASH/
+Debug_RAM/
+Release/
+
+# Binary & Object Files (실행 파일 및 중간 파일 무시)
+*.elf
+*.o
+*.map
+*.srec
+*.hex
+*.bin
+
+# Backup Files (S32DS가 자동으로 만드는 백업 파일 무시)
+*.bak
+*.tmp
