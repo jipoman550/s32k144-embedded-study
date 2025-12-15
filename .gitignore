@@ -11,7 +11,13 @@ Release/
 *.srec
 *.hex
 *.bin
+*.d
 
 # Backup Files (S32DS가 자동으로 만드는 백업 파일 무시)
 *.bak
 *.tmp
+
+# Eclipse & User specific settings (선택 사항이나 추천)
+.settings/
+.metadata/
+*.launch

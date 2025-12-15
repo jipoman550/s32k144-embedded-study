@@ -45,6 +45,42 @@
 
     5. 이후에는 **F8 (Resume)** 키를 눌러서 실행.
 ![Perspective 전환 화면](./images/perspective.png)
+
+### 3.4. [Critical] SDK API 호출 시 치명적 실수 (Watchdog/HardFault 원인)
+* **상황:** 빌드는 정상적으로 되는데, 디버깅 시작 직후 `WDOG_EWM_IRQHandler` (Watchdog 인터럽트) 혹은 `HardFault`에 빠지며 멈춤.
+* **초기 분석 오판:** 로그에 Watchdog이 뜨길래 Watchdog 초기화가 안 된 줄 알고 `WDOG_Disable` 함수만 계속 찾음.
+* **진짜 원인:** **C언어 포인터/배열 파라미터 전달 실수.**
+    * NXP SDK의 `CLOCK_SYS_Init` 등의 함수는 설정 구조체의 **배열(포인터)**을 인자로 받음.
+    * 이미 배열(`g_clockManConfigsArr`) 자체가 포인터 역할을 하는데, 습관적으로 주소 연산자 `&`를 붙여서 넘김.
+    * 함수 내부에서 엉뚱한 메모리 주소(쓰레기 값)를 참조하다가 시스템이 뻗어버림.
+
+* **해결 코드 비교:**
+```c
+/* [X] 잘못된 작성법 (HardFault 발생) */
+// 배열의 주소(&)를 넘기면 이중 포인터가 되어 엉뚱한 값을 가리킴
+CLOCK_SYS_Init(&g_clockManConfigsArr, ...);
+
+/* [O] 올바른 작성법 */
+// 배열의 이름은 그 자체로 첫 번째 요소의 주소(포인터)임
+CLOCK_SYS_Init(g_clockManConfigsArr, ...);
+```
+
+교훈:
+
+SDK 함수의 매개변수 타입을 정확히 확인하자. (특히 * 개수)
+
+로그는 거짓말을 하지 않지만, 원인을 직접 말해주지도 않는다. (Watchdog 에러는 결과일 뿐, 원인은 메모리 참조 오류였다.)
+
+### 3.5. FreeMASTER 변수 제어 실패 (Address 0x0000 이슈)
+* **증상:** FreeMASTER 연결은 성공(Open)했으나, 변수 값이 `1`이 아닌 엉뚱한 값(`28672` 등)이 뜨고 제어가 안 됨.
+* **원인:** `Create Watch Var` 시 변수 이름을 직접 타이핑했더니, 심볼 주소가 매핑되지 않고 **Address가 `0x0000`**으로 잡힘.
+* **해결:** 1. 기존 변수 삭제.
+    2. `Create Watch Var` -> 변수명 옆의 **`>>` (Symbol List)** 버튼 클릭.
+    3. 리스트에서 변수를 선택하여 추가 (Address가 `0x2000...` 등으로 정상 매핑됨 확인).
+* **교훈:** 변수는 반드시 심볼 리스트에서 불러와야 주소 매핑이 확실하다.
+![Perspective 전환 화면](./images/freemater_val_config.png)
+---
+
 ## 4. 코드 구현 (main.c)
 
 ### 주요 함수
