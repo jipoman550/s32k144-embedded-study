@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="com.pemicro.debug.gdbjtag.pne.launchConfigurationType">
-<stringAttribute key="com.nxp.s32ds.ext.cdt.debug.svd.svd_path" value=""/>
-<booleanAttribute key="com.nxp.s32ds.ext.cdt.debug.svd.use_default" value="true"/>
 <listAttribute key="com.pemicro.debug.gdbjtag.pne.ELVES"/>
-<listAttribute key="com.pemicro.debug.gdbjtag.pne.ELVES_OFFSET"/>
 <intAttribute key="com.pemicro.debug.gdbjtag.pne.NUMBER_ELVES" value="0"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.PE.BUSERR" value="true"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.PE.CHKERR" value="true"/>
@@ -11,9 +8,9 @@
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.PE.DEVICE_NAME" value="NXP_S32K1xx_S32K144F512M15"/>
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.PE.GDB_OPTIONS" value=""/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.PE.HARDERR" value="true"/>
-<intAttribute key="com.pemicro.debug.gdbjtag.pne.PE.HARDWARE_INTERFACE" value="6"/>
+<intAttribute key="com.pemicro.debug.gdbjtag.pne.PE.HARDWARE_INTERFACE" value="0"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.PE.INTERR" value="true"/>
-<stringAttribute key="com.pemicro.debug.gdbjtag.pne.PE.LAST_ATTRIBUTE_HEADER" value="com.pemicro.debug.gdbjtag.pne.sda."/>
+<stringAttribute key="com.pemicro.debug.gdbjtag.pne.PE.LAST_ATTRIBUTE_HEADER" value="com.pemicro.debug.gdbjtag.pne.ml."/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.PE.MMERR" value="true"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.PE.NOCPERR" value="true"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.PE.STATERR" value="true"/>
@@ -23,7 +20,7 @@
 <intAttribute key="com.pemicro.debug.gdbjtag.pne.algorithmIndex" value="0"/>
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.alternativeAlgorithmPath" value=""/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.attachToRunning" value="false"/>
-<stringAttribute key="com.pemicro.debug.gdbjtag.pne.customTrimFrequency" value="0"/>
+<intAttribute key="com.pemicro.debug.gdbjtag.pne.customTrimFrequency" value="0"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_eth.ALWAYS_ERASE" value="false"/>
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_eth.CYCLONE_IP" value=""/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_eth.DO_RESET_DELAY" value="false"/>
@@ -44,7 +41,7 @@
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_ser.CYCLONE_IP" value=""/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_ser.DO_RESET_DELAY" value="false"/>
 <intAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_ser.INTERFACE_PORT" value="0"/>
-<stringAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_ser.INTERFACE_PORT_STRING" value=""/>
+<stringAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_ser.INTERFACE_PORT_STRING" value="COM1"/>
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_ser.NETWORK_CARD_IP" value=""/>
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_ser.POWER_DOWN_DELAY" value="250"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.cyc_ser.POWER_OFF" value="false"/>
@@ -106,6 +103,8 @@
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.ml.SPECIFY_IP" value="false"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.ml.SPECIFY_NETWORK_CARD" value="false"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.ml.STARTUP_USE_SWD" value="true"/>
+<stringAttribute key="com.pemicro.debug.gdbjtag.pne.ml.SWO_BAUDRATE_SWITCH_MULTILINK_VALUE" value="-1.000000"/>
+<stringAttribute key="com.pemicro.debug.gdbjtag.pne.ml.SWO_BAUDRATE_SWITCH_TARGET_VALUE" value="-1.000000"/>
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.otherRunCommands" value=""/>
 <intAttribute key="com.pemicro.debug.gdbjtag.pne.partitionParam" value="0"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.preserveMemory0" value="false"/>
@@ -123,7 +122,7 @@
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.sda.CYCLONE_IP" value=""/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.sda.DO_RESET_DELAY" value="false"/>
 <intAttribute key="com.pemicro.debug.gdbjtag.pne.sda.INTERFACE_PORT" value="0"/>
-<stringAttribute key="com.pemicro.debug.gdbjtag.pne.sda.INTERFACE_PORT_STRING" value="USB1"/>
+<stringAttribute key="com.pemicro.debug.gdbjtag.pne.sda.INTERFACE_PORT_STRING" value=""/>
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.sda.NETWORK_CARD_IP" value=""/>
 <stringAttribute key="com.pemicro.debug.gdbjtag.pne.sda.POWER_DOWN_DELAY" value=""/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.sda.POWER_OFF" value="false"/>
@@ -135,8 +134,6 @@
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.sda.SPECIFY_IP" value="false"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.sda.SPECIFY_NETWORK_CARD" value="false"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.sda.STARTUP_USE_SWD" value="true"/>
-<stringAttribute key="com.pemicro.debug.gdbjtag.pne.sda.SWO_BAUDRATE_SWITCH_MULTILINK_VALUE" value="-1.000000"/>
-<stringAttribute key="com.pemicro.debug.gdbjtag.pne.sda.SWO_BAUDRATE_SWITCH_TARGET_VALUE" value="-1.000000"/>
 <intAttribute key="com.pemicro.debug.gdbjtag.pne.selectedCoreNumber" value="1"/>
 <intAttribute key="com.pemicro.debug.gdbjtag.pne.serverPortNumber" value="7224"/>
 <booleanAttribute key="com.pemicro.debug.gdbjtag.pne.trc_eth.ALWAYS_ERASE" value="false"/>
@@ -200,12 +197,12 @@
 <intAttribute key="org.eclipse.cdt.launch.ATTR_BUILD_BEFORE_LAUNCH_ATTR" value="2"/>
 <stringAttribute key="org.eclipse.cdt.launch.COREFILE_PATH" value=""/>
 <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_REGISTER_GROUPS" value=""/>
-<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="Debug_FLASH/LED_Blink_New_ver2.elf"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="LED_Blink_New_ver2"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="Debug_FLASH/LED_Blink_Red.elf"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="LED_Blink_Red"/>
 <booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="false"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="com.nxp.s32ds.cle.arm.mbs.arm32.bare.exe.debug.894680316"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="com.nxp.s32ds.cle.arm.mbs.arm32.bare.exe.debug.1866660345"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/LED_Blink_New_ver2"/>
+<listEntry value="/LED_Blink_Red"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="4"/>
