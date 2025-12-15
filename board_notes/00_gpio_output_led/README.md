@@ -78,7 +78,7 @@ SDK 함수의 매개변수 타입을 정확히 확인하자. (특히 * 개수)
     2. `Create Watch Var` -> 변수명 옆의 **`>>` (Symbol List)** 버튼 클릭.
     3. 리스트에서 변수를 선택하여 추가 (Address가 `0x2000...` 등으로 정상 매핑됨 확인).
 * **교훈:** 변수는 반드시 심볼 리스트에서 불러와야 주소 매핑이 확실하다.
-![Perspective 전환 화면](./images/freemater_val_config.png)
+![freemaster value config 화면](./images/freemater_val_config.png)
 ---
 
 ## 4. 코드 구현 (main.c)
