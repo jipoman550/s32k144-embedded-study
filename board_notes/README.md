@@ -9,6 +9,7 @@ NXP S32K144EVB 보드를 활용한 임베디드 시스템 학습 기록입니다
 | :--- | :--- | :--- | :--- | :--- |
 | [00](./00_gpio_output_led) | `00_gpio_output_led` | GPIO Output | GPIO, IDE Setup, Debugging | 2025.12.08 |
 | [01](./01_freemaster_s32k144) | `01_freemaster_s32k144` | ADC & FreeMASTER | ADC(SAR), Register Masking, Oscilloscope | 2025.12.15 |
+| [02](./02_RGB_Color_Mixer) | `02_RGB_Color_Mixer` | RGB Mixer | Interrupt, PWM, Color Mixing | 2025.12.20 |
 
 ---
 
