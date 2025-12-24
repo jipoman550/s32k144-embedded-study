@@ -33,6 +33,8 @@
 #include "ftm_pwm_driver.h" /* FTM 드라이버 함수 (FTM_DRV_UpdatePwmChannel 등) */
 #include "osif.h"           /* 시간 지연 함수 (OSIF_TimeDelay) */
 
+ftm_state_t flexTimer_pwm1_State;
+
   volatile int exit_code = 0;
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
@@ -71,29 +73,30 @@ int main(void)
 	CLOCK_SYS_UpdateConfiguration(0U, CLOCK_MANAGER_POLICY_AGREEMENT);
 
 	/* 2. 핀 초기화: 우리가 설정한 PTD15, 16, 0 핀을 FTM 모드로 전환합니다. */
-	PINS_DRV_Init(NUM_OF_CONFIGURED_PINS, g_pin_mux_InitConfigArr);
-
+	status_t st = PINS_DRV_Init(NUM_OF_CONFIGURED_PINS, g_pin_mux_InitConfigArr);
+	if (st != STATUS_SUCCESS) { for (;;){} }
+	FTM_DRV_Init(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_InitConfig, &flexTimer_pwm1_State);
 	/* 3. PWM 초기화: FTM0 모듈을 우리가 설정한 주기(10000)로 가동합니다. */
-	FTM_DRV_InitPwm(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_PwmConfig);
-
+	st = FTM_DRV_InitPwm(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_PwmConfig);
+	if (st != STATUS_SUCCESS) { for (;;){} }
   for(;;) {
 	/* 빨간색 LED(Channel 0)의 밝기를 현재 duty 값으로 업데이트합니다. */
 	FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_TICKS, duty, 0U, true);
 
     /* 밝기 조절 로직 (언더플로우 방지 버전) */
     if (increasing) {
-        duty += 1;
+        duty += 100;
         if (duty >= 10000) {
             duty = 10000;
             increasing = false;
         }
     } else {
         /* 여기서 0보다 작아지는 것을 미리 막아야 합니다! */
-        if (duty < 1) {
+        if (duty <= 100) {
             duty = 0;
             increasing = true;
         } else {
-            duty -= 1;
+            duty -= 100;
         }
     }
 
@@ -101,7 +104,7 @@ int main(void)
 	//OSIF_TimeDelay(10);
 
     /* [처방 2] 지연 시간을 짧게 줄임 */
-    //delay_dummy(10000);
+    delay_dummy(500000);
 
 	if(exit_code != 0) {
 	  break;

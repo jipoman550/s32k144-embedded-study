@@ -7,7 +7,7 @@
 **     Version     : Component 1.2.0, Driver 1.4, CPU db: 3.00.000
 **     Repository  : SDK_S32K1xx_15
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2025-12-24, 13:56, # CodeGen: 7
+**     Date/Time   : 2025-12-24, 15:23, # CodeGen: 14
 **     Abstract    :
 **
 **     Settings    :
@@ -116,11 +116,11 @@
 **                FTM0                                     : 
 **                  External Clock 0                       : <Automatic>
 **                  Channel 0                              : PTD15
-**                  Direction                              : Input
+**                  Direction                              : Output
 **                  Channel 1                              : PTD16
-**                  Direction                              : <Automatic>
+**                  Direction                              : Output
 **                  Channel 2                              : PTD0
-**                  Direction                              : <Automatic>
+**                  Direction                              : Output
 **                  Channel 3                              : <Automatic>
 **                  Direction                              : <Automatic>
 **                  Channel 4                              : <Automatic>
@@ -617,7 +617,7 @@
 **                Custom name, Signal name                 : PTD0
 **                Interrupt Status Field                   : <Automatic>
 **                Interrupt Configuration Field            : <Automatic>
-**                Pin Mux Field                            : <Automatic>
+**                Pin Mux Field                            : Alternative 2
 **                Lock Field                               : <Automatic>
 **                Drive Strength Field                     : <Automatic>
 **                Pull Enable Field                        : <Automatic>

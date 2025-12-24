@@ -35,12 +35,12 @@
       <File Name="SDK/platform/drivers/src/interrupt/interrupt_manager.c" FileDate="2025-12-20, 14:38:28" FileAge="1766209108469" FileType="1048576" />
       <File Name="SDK/platform/drivers/src/clock/S32K1xx/pmc_hw_access.h" FileDate="2025-12-20, 14:38:28" FileAge="1766209108938" FileType="1048576" />
       <File Name="SDK/platform/drivers/src/ftm/ftm_hw_access.h" FileDate="2025-12-20, 17:27:58" FileAge="1766219278482" FileType="1048576" />
-      <File Name="Generated_Code/flexTimer_pwm1.c" FileDate="2025-12-24, 14:07:34" FileAge="1766552854151" FileType="45637" CompNumb="5" />
+      <File Name="Generated_Code/flexTimer_pwm1.c" FileDate="2025-12-24, 14:35:51" FileAge="1766554551291" FileType="45637" CompNumb="5" />
       <File Name="SDK/platform/drivers/src/ftm/ftm_hw_access.c" FileDate="2025-12-20, 17:27:58" FileAge="1766219278457" FileType="1048576" />
       <File Name="SDK/platform/drivers/inc/ftm_common.h" FileDate="2025-12-20, 17:27:58" FileAge="1766219278491" FileType="1048576" />
       <File Name="SDK/platform/devices/callbacks.h" FileDate="2025-12-20, 14:38:29" FileAge="1766209109273" FileType="1048576" />
-      <File Name="Generated_Code/pin_mux.h" FileDate="2025-12-24, 13:56:46" FileAge="1766552206924" FileType="45637" CompNumb="2" />
-      <File Name="Sources/main.c" FileDate="2025-12-24, 13:58:54" FileAge="1766552334188" FileType="128" />
+      <File Name="Generated_Code/pin_mux.h" FileDate="2025-12-24, 15:23:11" FileAge="1766557391238" FileType="45637" CompNumb="2" />
+      <File Name="Sources/main.c" FileDate="2025-12-24, 14:50:01" FileAge="1766555401440" FileType="128" />
       <File Name="SDK/platform/drivers/src/pins/pins_driver.c" FileDate="2025-12-20, 14:38:28" FileAge="1766209108274" FileType="1048576" />
       <File Name="Generated_Code/pin_mux.c" FileDate="2025-12-24, 10:36:12" FileAge="1766540172187" FileType="45637" CompNumb="2" />
       <File Name="SDK/platform/drivers/src/clock/S32K1xx/scg_hw_access.h" FileDate="2025-12-20, 14:38:28" FileAge="1766209108982" FileType="1048576" />
@@ -70,5 +70,5 @@
       <File Name="Generated_Code/Cpu.c" FileDate="2025-12-20, 17:27:58" FileAge="1766219278676" FileType="45637" CompNumb="1" />
     </GeneratedByPE>
   </GeneratedFilesList>
-  <CodeGenReference>9</CodeGenReference>
+  <CodeGenReference>17</CodeGenReference>
 </CodeGenerationInfo>

@@ -7,7 +7,7 @@
 **     Version     : Component SDK_S32K1xx_15, Driver 01.00, CPU db: 3.00.000
 **     Repository  : SDK_S32K1xx_15
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2025-12-24, 14:07, # CodeGen: 8
+**     Date/Time   : 2025-12-24, 14:35, # CodeGen: 10
 **
 **     Copyright 1997 - 2015 Freescale Semiconductor, Inc. 
 **     Copyright 2016-2017 NXP 
@@ -89,8 +89,8 @@ ftm_independent_ch_param_t flexTimer_pwm1_IndependentChannelsConfig[3] =
 {
     {
         0U, /* hwChannelId */
-        FTM_POLARITY_HIGH, /* Polarity of the PWM signal */
-        50U, /* Duty cycle percent 0-0x8000 */
+        FTM_POLARITY_LOW, /* Polarity of the PWM signal */
+        0U, /* Duty cycle percent 0-0x8000 */
         false, /* External Trigger */
         FTM_LOW_STATE, /* Safe state of the PWM channel when faults are detected */
         false, /* Enabled/disabled the channel (n+1) output */
