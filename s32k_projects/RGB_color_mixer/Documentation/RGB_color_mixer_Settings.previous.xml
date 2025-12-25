@@ -85,5 +85,18 @@
       <EmptySection_DummyValue />
     </Events>
   </Bean>
+  <Bean name="osif1" type="osif">
+    <Enabled v="Y" />
+    <Properties>
+      <Component_name v="osif1" />
+      <Component_version v="osifcommon" />
+    </Properties>
+    <Methods>
+      <EmptySection_DummyValue />
+    </Methods>
+    <Events>
+      <EmptySection_DummyValue />
+    </Events>
+  </Bean>
 </PE_PROJECT_SETTINGS_DOCUMENTATION>
 

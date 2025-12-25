@@ -33,6 +33,9 @@
 #include "ftm_pwm_driver.h" /* FTM 드라이버 함수 (FTM_DRV_UpdatePwmChannel 등) */
 #include "osif.h"           /* 시간 지연 함수 (OSIF_TimeDelay) */
 
+/* [추가] ADC 드라이버 사용을 위한 헤더 파일 */
+#include "adConv1.h"
+
 ftm_state_t flexTimer_pwm1_State;
 
   volatile int exit_code = 0;
@@ -56,9 +59,9 @@ void delay_dummy(volatile int cycles) {
 int main(void)
 {
   /* Write your local variable definition here */
-	/* [처방 1] 시작하자마자 불이 켜져야 합니다! (50% 밝기) */
-	uint16_t duty = 5000;
-	bool increasing = true;
+    /* 변수 선언 */
+    uint16_t adcValue; /* ADC로부터 읽어온 디지털 값 (0~4095) */
+    uint16_t duty;     /* PWM에 적용할 듀티 값 (0~10000) */
 
   /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
   #ifdef PEX_RTOS_INIT
@@ -68,43 +71,35 @@ int main(void)
 
   /* Write your code here */
   /* For example: for(;;) { } */
-	/* 1. 클럭 매니저 초기화: 칩의 모든 모듈에 심장박동(Clock)을 공급합니다. */
-	CLOCK_SYS_Init(g_clockManConfigsArr, CLOCK_MANAGER_CONFIG_CNT, g_clockManCallbacksArr, CLOCK_MANAGER_CALLBACK_CNT);
-	CLOCK_SYS_UpdateConfiguration(0U, CLOCK_MANAGER_POLICY_AGREEMENT);
+    /* 1. 클럭 매니저 초기화 */
+    CLOCK_SYS_Init(g_clockManConfigsArr, CLOCK_MANAGER_CONFIG_CNT, g_clockManCallbacksArr, CLOCK_MANAGER_CALLBACK_CNT);
+    CLOCK_SYS_UpdateConfiguration(0U, CLOCK_MANAGER_POLICY_AGREEMENT);
 
-	/* 2. 핀 초기화: 우리가 설정한 PTD15, 16, 0 핀을 FTM 모드로 전환합니다. */
-	status_t st = PINS_DRV_Init(NUM_OF_CONFIGURED_PINS, g_pin_mux_InitConfigArr);
-	if (st != STATUS_SUCCESS) { for (;;){} }
-	FTM_DRV_Init(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_InitConfig, &flexTimer_pwm1_State);
-	/* 3. PWM 초기화: FTM0 모듈을 우리가 설정한 주기(10000)로 가동합니다. */
-	st = FTM_DRV_InitPwm(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_PwmConfig);
-	if (st != STATUS_SUCCESS) { for (;;){} }
-  for(;;) {
-	/* 빨간색 LED(Channel 0)의 밝기를 현재 duty 값으로 업데이트합니다. */
-	FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_TICKS, duty, 0U, true);
+    /* 2. 핀 초기화 (PTD15, 16, 0 및 ADC 입력 핀 설정) */
+    PINS_DRV_Init(NUM_OF_CONFIGURED_PINS, g_pin_mux_InitConfigArr);
 
-    /* 밝기 조절 로직 (언더플로우 방지 버전) */
-    if (increasing) {
-        duty += 100;
-        if (duty >= 10000) {
-            duty = 10000;
-            increasing = false;
-        }
-    } else {
-        /* 여기서 0보다 작아지는 것을 미리 막아야 합니다! */
-        if (duty <= 100) {
-            duty = 0;
-            increasing = true;
-        } else {
-            duty -= 100;
-        }
-    }
+    /* 3. FTM 초기화 및 PWM 설정 */
+    FTM_DRV_Init(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_InitConfig, &flexTimer_pwm1_State);
+    FTM_DRV_InitPwm(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_PwmConfig);
 
-	/* 너무 빠르면 눈이 인식 못 하므로 10ms 정도 기다려줍니다. (OSIF는 SDK 기본 제공 지연 함수) */
-	//OSIF_TimeDelay(10);
+    /* adConv1.h의 리스트에 따라 ConfigConverter로 초기화 진행 */
+    ADC_DRV_ConfigConverter(INST_ADCONV1, &adConv1_ConvConfig0);
 
-    /* [처방 2] 지연 시간을 짧게 줄임 */
-    delay_dummy(500000);
+    for(;;) {
+        /* 1. 채널 설정 및 변환 시작 */
+        ADC_DRV_ConfigChan(INST_ADCONV1, 0U, &adConv1_ChnConfig0);
+
+        /* 2. 변환 완료 대기 (헤더 54행의 GetConvCompleteFlag 사용) */
+        while(ADC_DRV_GetConvCompleteFlag(INST_ADCONV1, 0U) == false);
+
+        /* 3. 결과 읽기 (헤더 55행에 따라 3개의 인자 사용 및 주소 전달) */
+        ADC_DRV_GetChanResult(INST_ADCONV1, 0U, &adcValue);
+
+        /* 4. PWM 업데이트 로직 */
+        duty = (uint16_t)((uint32_t)adcValue * 10000 / 4095);
+        FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_TICKS, duty, 0U, true);
+
+        delay_dummy(100000);
 
 	if(exit_code != 0) {
 	  break;
