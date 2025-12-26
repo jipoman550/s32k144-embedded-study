@@ -24,30 +24,38 @@
 
 
 /* Including necessary module. Cpu.h contains other modules needed for compiling.*/
+/* 필요한 드라이버 헤더 파일들 */
 #include "Cpu.h"
-
-/* [수정 1] 필요한 헤더 파일들을 여기에 추가합니다. */
-#include "clockMan1.h"      /* 클럭 설정 정보 */
-#include "pin_mux.h"        /* 핀 설정 정보 (NUM_OF_CONFIGURED_PINS0 등) */
-#include "flexTimer_pwm1.h" /* FTM 설정 정보 (INST_FLEXTIMER_PWM1 등) */
-#include "ftm_pwm_driver.h" /* FTM 드라이버 함수 (FTM_DRV_UpdatePwmChannel 등) */
-#include "osif.h"           /* 시간 지연 함수 (OSIF_TimeDelay) */
-
-/* [추가] ADC 드라이버 사용을 위한 헤더 파일 */
+#include "clockMan1.h"
+#include "pin_mux.h"
+#include "flexTimer_pwm1.h"
+#include "ftm_pwm_driver.h"
+#include "osif.h"
 #include "adConv1.h"
 
-ftm_state_t flexTimer_pwm1_State;
+/* [추가] UART 및 FreeMASTER 헤더 파일 */
+#include "lpuart1.h"      /* UART 통신 채널 설정을 위함 */
+#include "freemaster.h"   /* FreeMASTER 프로토콜 엔진 사용을 위함 */
+
+/* [중요] FreeMASTER에서 관찰할 변수들은 반드시 전역(Global) 변수로 선언해야 합니다. */
+uint16_t adcValue;        /* 가변 저항 읽기값 (0~4095) */
+uint16_t dutyRed;         /* 빨간색 LED 출력값 (0~10000) */
+uint16_t dutyGreen;       /* 녹색 LED 출력값 (0~10000) */
+uint16_t dutyBlue;        /* 파란색 LED 출력값 (0~10000) */
+
+/* 드라이버 상태 저장용 구조체 (메모장 역할) */
+ftm_state_t flexTimer_pwm1_State;    /* FTM 상태 저장 */
 
   volatile int exit_code = 0;
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
 
 /* 아무 기능 없이 CPU만 뱅뱅 돌려서 시간 끄는 함수 */
-void delay_dummy(volatile int cycles) {
-  while(cycles--) {
-	  __asm("nop"); /* No Operation (아무것도 안 함) */
-  }
-}
+//void delay_dummy(volatile int cycles) {
+//  while(cycles--) {
+//	  __asm("nop"); /* No Operation (아무것도 안 함) */
+//  }
+//}
 
 
 /*!
@@ -60,8 +68,8 @@ int main(void)
 {
   /* Write your local variable definition here */
     /* 변수 선언 */
-    uint16_t adcValue; /* ADC로부터 읽어온 디지털 값 (0~4095) */
-    uint16_t duty;     /* PWM에 적용할 듀티 값 (0~10000) */
+    //uint16_t adcValue; /* ADC로부터 읽어온 디지털 값 (0~4095) */
+    //uint16_t duty;     /* PWM에 적용할 듀티 값 (0~10000) */
 
   /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
   #ifdef PEX_RTOS_INIT
@@ -71,35 +79,60 @@ int main(void)
 
   /* Write your code here */
   /* For example: for(;;) { } */
-    /* 1. 클럭 매니저 초기화 */
-    CLOCK_SYS_Init(g_clockManConfigsArr, CLOCK_MANAGER_CONFIG_CNT, g_clockManCallbacksArr, CLOCK_MANAGER_CALLBACK_CNT);
-    CLOCK_SYS_UpdateConfiguration(0U, CLOCK_MANAGER_POLICY_AGREEMENT);
+	/* 1. 클럭 매니저 초기화: 모든 하드웨어에 전기(심장박동) 공급 */
+	CLOCK_SYS_Init(g_clockManConfigsArr, CLOCK_MANAGER_CONFIG_CNT, g_clockManCallbacksArr, CLOCK_MANAGER_CALLBACK_CNT);
+	CLOCK_SYS_UpdateConfiguration(0U, CLOCK_MANAGER_POLICY_AGREEMENT);
 
-    /* 2. 핀 초기화 (PTD15, 16, 0 및 ADC 입력 핀 설정) */
-    PINS_DRV_Init(NUM_OF_CONFIGURED_PINS, g_pin_mux_InitConfigArr);
+	/* 2. 핀 초기화: PTD15(R), PTD16(G), PTD0(B) 및 PTC6/7(UART) 통로 개방 */
+	PINS_DRV_Init(NUM_OF_CONFIGURED_PINS, g_pin_mux_InitConfigArr);
 
-    /* 3. FTM 초기화 및 PWM 설정 */
-    FTM_DRV_Init(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_InitConfig, &flexTimer_pwm1_State);
-    FTM_DRV_InitPwm(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_PwmConfig);
+	/* 3. UART 초기화: PC와 대화할 시리얼 통로를 엽니다 (LPUART1) */
+	LPUART_DRV_Init(INST_LPUART1, &lpuart1_State, &lpuart1_InitConfig0);
 
-    /* adConv1.h의 리스트에 따라 ConfigConverter로 초기화 진행 */
-    ADC_DRV_ConfigConverter(INST_ADCONV1, &adConv1_ConvConfig0);
+	/* [핵심 수정] 예제처럼 FreeMASTER 인터럽트 핸들러를 직접 등록합니다. */
+	/* 이 코드가 들어가면 이전에 넣었던 DisableIRQ 코드는 지워주세요. */
+	INT_SYS_InstallHandler(LPUART1_RxTx_IRQn, FMSTR_Isr, (isr_t*)0);
+	INT_SYS_EnableIRQ(LPUART1_RxTx_IRQn);
 
-    for(;;) {
-        /* 1. 채널 설정 및 변환 시작 */
-        ADC_DRV_ConfigChan(INST_ADCONV1, 0U, &adConv1_ChnConfig0);
+	/* 4. FreeMASTER 엔진 초기화: 통신 프로토콜을 준비시킵니다 */
+	FMSTR_Init();
 
-        /* 2. 변환 완료 대기 (헤더 54행의 GetConvCompleteFlag 사용) */
-        while(ADC_DRV_GetConvCompleteFlag(INST_ADCONV1, 0U) == false);
+	/* 5. FTM(PWM) 초기화: LED 밝기를 조절할 엔진 가동 */
+	FTM_DRV_Init(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_InitConfig, &flexTimer_pwm1_State);
+	FTM_DRV_InitPwm(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_PwmConfig);
 
-        /* 3. 결과 읽기 (헤더 55행에 따라 3개의 인자 사용 및 주소 전달) */
-        ADC_DRV_GetChanResult(INST_ADCONV1, 0U, &adcValue);
+	/* 6. ADC 초기화: 가변 저항 전압을 읽을 준비 */
+	ADC_DRV_ConfigConverter(INST_ADCONV1, &adConv1_ConvConfig0);
 
-        /* 4. PWM 업데이트 로직 */
-        duty = (uint16_t)((uint32_t)adcValue * 10000 / 4095);
-        FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_TICKS, duty, 0U, true);
+	for(;;) {
+		/* [동작 1] 가변 저항 값 읽기 (0~4095) */
+		ADC_DRV_ConfigChan(INST_ADCONV1, 0U, &adConv1_ChnConfig0);
+		while(ADC_DRV_GetConvCompleteFlag(INST_ADCONV1, 0U) == false);
+		ADC_DRV_GetChanResult(INST_ADCONV1, 0U, &adcValue);
 
-        delay_dummy(100000);
+		/* [동작 2] 하나의 가변 저항 값으로 3개의 색상 밝기 계산 (구간 분할) */
+		if (adcValue < 1365) {
+			dutyRed = (uint16_t)((uint32_t)adcValue * 10000 / 1365);
+			dutyGreen = 0; dutyBlue = 0;
+		} else if (adcValue < 2730) {
+			dutyRed = 0;
+			dutyGreen = (uint16_t)((uint32_t)(adcValue - 1365) * 10000 / 1365);
+			dutyBlue = 0;
+		} else {
+			dutyRed = 0; dutyGreen = 0;
+			dutyBlue = (uint16_t)((uint32_t)(adcValue - 2730) * 10000 / 1365);
+		}
+
+		/* [동작 3] 실제 LED 밝기에 반영 */
+		FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_TICKS, dutyRed, 0U, true);
+		FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 1U, FTM_PWM_UPDATE_IN_TICKS, dutyGreen, 0U, true);
+		FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 2U, FTM_PWM_UPDATE_IN_TICKS, dutyBlue, 0U, true);
+
+		/* [중요] FreeMASTER 데이터 업데이트: PC와의 통신을 실시간으로 처리합니다 */
+		FMSTR_Poll();
+
+		/* 너무 빠른 루프 방지를 위한 짧은 지연 */
+		OSIF_TimeDelay(10);
 
 	if(exit_code != 0) {
 	  break;
