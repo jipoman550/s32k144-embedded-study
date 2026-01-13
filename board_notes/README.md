@@ -23,4 +23,15 @@ NXP S32K144EVB 보드를 활용한 임베디드 시스템 학습 기록입니다
 
 ### 📈 01. FreeMASTER ADC Oscilloscope (Deep Dive)
 * **목표:** 가변 저항(Potentiometer)의 전압 변화를 ADC로 읽어들이고, **FreeMASTER**를 통해 실시간 그래프(오실로스코프)로 시각화.
+
+### 🎨 02. RGB Color Mixer (ADC + PWM + Interrupt)
+
+* **목표:** 가변 저항의 아날로그 입력을 3개의 구간으로 수치화하고, 각 구간에 매칭되는 RGB LED의 밝기를 PWM으로 제어하여 실시간 색상 혼합(Color Mixing) 구현.
+* **학습 내용:**
+    * **하이브리드 제어 구조:** ADC 데이터 획득에는 **Polling** 방식을, FreeMASTER 통신 모니터링에는 **Interrupt** 방식을 적용하여 시스템 제어와 통신의 효율성 최적화.
+    * **PWM Duty Cycle 제어:**  범위의 ADC 디지털 값을  범위의 PWM 듀티 사이클로 정밀 스케일링(Scaling)하는 수식 설계 및 구현.
+    * **인터럽트 핸들러 수동 등록:** `INT_SYS_InstallHandler` 함수를 통해 LPUART1 하드웨어 인터럽트와 FreeMASTER 엔진(`FMSTR_Isr`)을 직접 연결하는 로우레벨(Low-level) 인터럽트 설정 실습.
+    * **데이터 시각화:** **FreeMASTER**를 활용하여 가변 저항 회전에 따른 RGB 각 채널의 Duty Cycle 변화를 실시간 파형(Scope)으로 분석 및 검증.
+
+
 ---
