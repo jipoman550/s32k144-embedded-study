@@ -103,7 +103,7 @@
     <Enabled v="Y" />
     <Properties>
       <Component_name v="lpuart1" />
-      <Device v="LPUART0" />
+      <Device v="LPUART1" />
       <Component_version v="S32K144_SDK01" />
     </Properties>
     <Methods>
@@ -132,6 +132,20 @@
     <Properties>
       <Component_name v="osif1" />
       <Component_version v="osifcommon" />
+    </Properties>
+    <Methods>
+      <EmptySection_DummyValue />
+    </Methods>
+    <Events>
+      <EmptySection_DummyValue />
+    </Events>
+  </Bean>
+  <Bean name="lpit1" type="lpit">
+    <Enabled v="Y" />
+    <Properties>
+      <Component_name v="lpit1" />
+      <Device v="LPIT0" />
+      <Component_version v="S32K144_SDK01" />
     </Properties>
     <Methods>
       <EmptySection_DummyValue />

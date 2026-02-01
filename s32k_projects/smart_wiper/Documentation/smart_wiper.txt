@@ -210,6 +210,46 @@ Module "osif1"     (component osif)
    - osif1_OSIF_GetMilliseconds -Returns the number of miliseconds elapsed since starting the internal timer or starting the 
                 scheduler.
 
+Module "lpit1"     (component lpit)
+   - lpit1_LPIT_DRV_GetDefaultConfig -Gets default LPIT module configuration structure
+   - lpit1_LPIT_DRV_GetDefaultChanConfig -Gets default timer channel configuration structure
+   - lpit1_LPIT_DRV_Init -Initializes the LPIT module.
+   - lpit1_LPIT_DRV_Deinit -De-initializes LPIT module.
+   - lpit1_LPIT_DRV_InitChannel -Initializes the LPIT channel.
+   - lpit1_LPIT_DRV_StartTimerChannels -Starts the timer channel counting.
+   - lpit1_LPIT_DRV_StopTimerChannels -Stops the timer channel counting.
+   - lpit1_LPIT_DRV_SetTimerPeriodByUs -Sets the timer channel period in microseconds.
+   - lpit1_LPIT_DRV_SetTimerPeriodInDual16ModeByUs -Sets the timer channel period in microseconds when the timer channel mode 
+                is dual 16 bit periodic counter.
+   - lpit1_LPIT_DRV_GetTimerPeriodByUs -Gets the timer channel period in microseconds.
+   - lpit1_LPIT_DRV_GetCurrentTimerUs -Gets the current timer channel counting value in microseconds.
+   - lpit1_LPIT_DRV_SetTimerPeriodByCount -Sets the timer channel period in count unit.
+   - lpit1_LPIT_DRV_SetTimerPeriodInDual16ModeByCount -Sets the timer channel period in count when the timer channel mode is 
+                dual 16 bit periodic counter.
+   - lpit1_LPIT_DRV_GetTimerPeriodByCount -Gets the current timer channel period in count unit.
+   - lpit1_LPIT_DRV_GetCurrentTimerCount -Gets the current timer channel counting value in count.
+   - lpit1_LPIT_DRV_EnableTimerChannelInterrupt -Enables the interrupt generation of timer channel.
+   - lpit1_LPIT_DRV_DisableTimerChannelInterrupt -Disables the interrupt generation of timer channel.
+   - lpit1_LPIT_DRV_GetInterruptFlagTimerChannels -Gets the current interrupt flag of timer channels.
+   - lpit1_LPIT_DRV_ClearInterruptFlagTimerChannels -Clears the interrupt flag of timer channels.
+
+Module "watchdog1" (component wdog)
+   - watchdog1_WDOG_DRV_Init -Initializes the WDOG driver.
+   - watchdog1_WDOG_DRV_Deinit -De-initializes the WDOG driver.
+   - watchdog1_WDOG_DRV_GetConfig -Gets the current configuration of the WDOG.
+   - watchdog1_WDOG_DRV_GetDefaultConfig -Gets default configuration of the WDOG.
+   - watchdog1_WDOG_DRV_SetInt -Enables/Disables the WDOG timeout interrupt and sets a function to be called when a timeout 
+                interrupt is received, before reset.
+   - watchdog1_WDOG_DRV_ClearIntFlag -Clear interrupt flag of the WDOG.
+   - watchdog1_WDOG_DRV_Trigger -Refreshes the WDOG counter.
+   - watchdog1_WDOG_DRV_GetCounter -Gets the value of the WDOG counter.
+   - watchdog1_WDOG_DRV_SetWindow -Set window mode and window value of the WDOG.
+   - watchdog1_WDOG_DRV_SetMode -Sets the mode operation of the WDOG.
+   - watchdog1_WDOG_DRV_SetTimeout -Sets the value of the WDOG timeout.
+   - watchdog1_WDOG_DRV_SetTestMode -This function changes the test mode of the WDOG. If the WDOG is tested in mode, software 
+                should set this field to 0x01U in order to indicate that the WDOG is functioning normally.
+   - watchdog1_WDOG_DRV_GetTestMode -This function verifies the test mode of the WDOG.
+
 Module "Cpu"       (component S32K144_100)
    - Cpu_SystemInit -This function disables the watchdog, enables FPU and the power mode protection. SystemInit is called from 
                 startup_device file.
