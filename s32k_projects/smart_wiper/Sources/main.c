@@ -59,6 +59,11 @@ uint32_t currentTime = 0;
 uint32_t lastTime = 0;
 volatile uint32_t ms_ticks = 0; // 1ms마다 1씩 증가할 진짜 시계
 
+/* [추가] 제어권 및 PC 명령 변수 */
+volatile uint8_t controlSource = 0;    // 0: 가변저항(ADC), 1: PC(FreeMASTER)
+volatile WiperMode_t pcModeRequest = MODE_OFF; // PC에서 보낼 모드 명령
+
+
 /* --- [Section 2] 설정값 --- */
 #define POS_0_DEG      800
 #define POS_140_DEG    3300
@@ -147,10 +152,18 @@ int main(void)
 		ADC_DRV_GetChanResult(INST_ADCONV1, 0U, &adcValue);
 
 		/* [STEP 2] ADC 값에 따른 상태 결정 (설계사양서 준수) */
-		if (adcValue < 500)         currentMode = MODE_OFF;
-		else if (adcValue < 2000)   currentMode = MODE_INT;
-		else if (adcValue < 3500)   currentMode = MODE_LOW;
-		else                        currentMode = MODE_HIGH;
+		if (controlSource == 0) {
+			/* [기존 로직] 가변저항(ADC) 대장 모드 */
+			if (adcValue < 500)       currentMode = MODE_OFF;
+			else if (adcValue < 2000) currentMode = MODE_INT;
+			else if (adcValue < 3500) currentMode = MODE_LOW;
+			else                      currentMode = MODE_HIGH;
+		}
+		else {
+			/* [새로운 로직] PC(FreeMASTER) 대장 모드 */
+			// PC에서 pcModeRequest 값을 바꾸면 즉시 와이퍼 모드가 바뀝니다.
+			currentMode = pcModeRequest;
+		}
 
 		/* [STEP 3] 비차단 상태별 동작 수행 */
 		switch(currentMode) {
