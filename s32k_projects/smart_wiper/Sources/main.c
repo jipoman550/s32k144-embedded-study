@@ -24,7 +24,7 @@
 
 
 /* Including necessary module. Cpu.h contains other modules needed for compiling.*/
-/* 1. ÇÊ¿äÇÑ µå¶óÀÌ¹ö Çì´õ ÆÄÀÏµéÀ» include ¼½¼Ç¿¡ Ãß°¡ÇÕ´Ï´Ù. */
+/* 1. ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ì¹ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ include ï¿½ï¿½ï¿½Ç¿ï¿½ ï¿½ß°ï¿½ï¿½Õ´Ï´ï¿½. */
 #include "Cpu.h"
 #include "clockMan1.h"
 #include "pin_mux.h"
@@ -36,7 +36,7 @@
 
   volatile int exit_code = 0;
 
-/* --- [Section 1] »óÅÂ Á¤ÀÇ ¹× Àü¿ª º¯¼ö --- */
+/* --- [Section 1] ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ --- */
 typedef enum {
   MODE_OFF,
   MODE_INT,
@@ -44,11 +44,11 @@ typedef enum {
   MODE_HIGH
 } WiperMode_t;
 
-// ¿ÍÀÌÆÛÀÇ ¼¼ºÎ µ¿ÀÛ »óÅÂ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 typedef enum {
     WIPER_IDLE,
-    WIPER_MOVING_UP,   // 0 -> 140µµ·Î ÀÌµ¿ Áß
-    WIPER_MOVING_DOWN  // 140 -> 0µµ·Î º¹±Í Áß
+    WIPER_MOVING_UP,   // 0 -> 140ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½
+    WIPER_MOVING_DOWN  // 140 -> 0ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 } WiperStep_t;
 
 WiperMode_t currentMode = MODE_OFF;
@@ -57,25 +57,25 @@ ftm_state_t ftmStateStruct;
 uint16_t adcValue = 0;
 uint32_t currentTime = 0;
 uint32_t lastTime = 0;
-volatile uint32_t ms_ticks = 0; // 1ms¸¶´Ù 1¾¿ Áõ°¡ÇÒ ÁøÂ¥ ½Ã°è
+volatile uint32_t ms_ticks = 0; // 1msï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Â¥ ï¿½Ã°ï¿½
 
-/* [Ãß°¡] Á¦¾î±Ç ¹× PC ¸í·É º¯¼ö */
-volatile uint8_t controlSource = 0;    // 0: °¡º¯ÀúÇ×(ADC), 1: PC(FreeMASTER)
-volatile WiperMode_t pcModeRequest = MODE_OFF; // PC¿¡¼­ º¸³¾ ¸ðµå ¸í·É
+/* [ï¿½ß°ï¿½] ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ PC ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
+volatile uint8_t controlSource = 0;    // 0: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ADC), 1: PC(FreeMASTER)
+volatile WiperMode_t pcModeRequest = MODE_OFF; // PCï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 
-/* --- [Section 2] ¼³Á¤°ª --- */
+/* --- [Section 2] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ --- */
 #define POS_0_DEG      800
 #define POS_140_DEG    3300
-#define INT_WAIT_TIME  3000 // 3ÃÊ ´ë±â
+#define INT_WAIT_TIME  3000 // 3ï¿½ï¿½ ï¿½ï¿½ï¿½
 
-/* --- [Section 2] LPIT ÀÎÅÍ·´Æ® ¼­ºñ½º ·çÆ¾ (ISR) --- */
-// 1ms¸¶´Ù ÇÏµå¿þ¾î°¡ ÀÌ ÇÔ¼ö¸¦ ÀÚµ¿À¸·Î È£ÃâÇÕ´Ï´Ù.
+/* --- [Section 2] LPIT ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ¾ (ISR) --- */
+// 1msï¿½ï¿½ï¿½ï¿½ ï¿½Ïµï¿½ï¿½ï¿½î°¡ ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 void LPIT0_Ch0_IRQHandler(void)
 {
-    // ÀÎÅÍ·´Æ® ÇÃ·¡±×¸¦ Áö¿öÁà¾ß ´ÙÀ½ ÀÎÅÍ·´Æ®°¡ ¹ß»ýÇÕ´Ï´Ù.
+    // ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½Ã·ï¿½ï¿½×¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í·ï¿½Æ®ï¿½ï¿½ ï¿½ß»ï¿½ï¿½Õ´Ï´ï¿½.
     LPIT_DRV_ClearInterruptFlagTimerChannels(INST_LPIT1, (1 << 0));
-    ms_ticks++; // ½Ã°è ¼ýÀÚ Áõ°¡
+    ms_ticks++; // ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 }
 
 
@@ -99,73 +99,73 @@ int main(void)
 
   /* Write your code here */
   /* For example: for(;;) { } */
-    /* ÇÏµå¿þ¾î ÃÊ±âÈ­ (±âÁ¸ ÄÚµå À¯Áö) */
+    /* ï¿½Ïµï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ (ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½) */
 	CLOCK_SYS_Init(g_clockManConfigsArr, CLOCK_MANAGER_CONFIG_CNT, g_clockManCallbacksArr, CLOCK_MANAGER_CALLBACK_CNT);
 	CLOCK_SYS_UpdateConfiguration(0U, CLOCK_MANAGER_POLICY_AGREEMENT);
 
-	/* 2. ¿öÄ¡µ¶ °­Á¦ ºñÈ°¼ºÈ­ (Nuclear Option) */
-	// ¿öÄ¡µ¶ ·¹Áö½ºÅÍ¿¡ Á÷Á¢ Á¢±ÙÇÏ¿© Àá±ÝÀ» ÇØÁ¦ÇÏ°í EN ºñÆ®¸¦ ²ü´Ï´Ù.
+	/* 2. ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­ (Nuclear Option) */
+	// ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ EN ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½.
 //	WDOG->CNT = 0xD928C520;              // Unlock Å° 1
 //	WDOG->CNT = 0xD928C520;              // Unlock Å° 2
-//	while((WDOG->CS & (1U << 11)) == 0); // Àá±Ý ÇØÁ¦µÉ ¶§±îÁö ´ë±â
-//	WDOG->CS &= ~(1U << 7);              // EN(Enable) ºñÆ® ÇØÁ¦ (¿ÏÀüÈ÷ ²ô±â)
+//	while((WDOG->CS & (1U << 11)) == 0); // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+//	WDOG->CS &= ~(1U << 7);              // EN(Enable) ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 
 	PINS_DRV_Init(NUM_OF_CONFIGURED_PINS, g_pin_mux_InitConfigArr);
 	ADC_DRV_ConfigConverter(INST_ADCONV1, &adConv1_ConvConfig0);
 	FTM_DRV_Init(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_InitConfig, &ftmStateStruct);
 	FTM_DRV_InitPwm(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_PwmConfig);
 
-	// LPIT Å¸ÀÌ¸Ó ÃÊ±âÈ­ ¹× ½ÃÀÛ
+	// LPIT Å¸ï¿½Ì¸ï¿½ ï¿½Ê±ï¿½È­ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	LPIT_DRV_Init(INST_LPIT1, &lpit1_InitConfig);
 	LPIT_DRV_InitChannel(INST_LPIT1, 0, &lpit1_ChnConfig0);
 	LPIT_DRV_StartTimerChannels(INST_LPIT1, (1 << 0));
 
-	// 1. LPUART1 ¹°¸® °èÃþ ÃÊ±âÈ­
+	// 1. LPUART1 ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
 	LPUART_DRV_Init(INST_LPUART1, &lpuart1_State, &lpuart1_InitConfig0);
 
-	// 2. LPUART ÀÎÅÍ·´Æ®¿Í FreeMASTER ¼­ºñ½º ·çÆ¾ ¿¬°á
-	// UART·Î µ¥ÀÌÅÍ°¡ µé¾î¿À¸é CPU°¡ FMSTR_Isr ÇÔ¼ö·Î ¹Ù·Î Á¡ÇÁÇÏ°Ô ¸¸µì´Ï´Ù.
+	// 2. LPUART ï¿½ï¿½ï¿½Í·ï¿½Æ®ï¿½ï¿½ FreeMASTER ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ¾ ï¿½ï¿½ï¿½ï¿½
+	// UARTï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ CPUï¿½ï¿½ FMSTR_Isr ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½Ù·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
 	INT_SYS_InstallHandler(LPUART1_RxTx_IRQn, FMSTR_Isr, NULL);
 
-	// 3. ÇÏµå¿þ¾î ·¹º§¿¡¼­ LPUART ÀÎÅÍ·´Æ® Åë·Î °³¹æ
+	// 3. ï¿½Ïµï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ LPUART ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	INT_SYS_EnableIRQ(LPUART1_RxTx_IRQn);
 
-	// 4. FreeMASTER µå¶óÀÌ¹ö »óÀ§ °èÃþ ÃÊ±âÈ­
+	// 4. FreeMASTER ï¿½ï¿½ï¿½ï¿½Ì¹ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
 	FMSTR_Init();
 
-	// 5. ½Ã½ºÅÛ ÀüÃ¼ ÀÎÅÍ·´Æ® È°¼ºÈ­ (LPIT¿Í LPUART ¸ðµÎ¸¦ À§ÇØ ÇÊ¼ö)
+	// 5. ï¿½Ã½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½Í·ï¿½Æ® È°ï¿½ï¿½È­ (LPITï¿½ï¿½ LPUART ï¿½ï¿½Î¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¼ï¿½)
 	INT_SYS_EnableIRQGlobal();
 
-    // ºñÂ÷´Ü ·ÎÁ÷À» À§ÇÑ ½Ã°£ °ü¸® º¯¼ö
-    uint32_t moveDuration = 500; // ±âº» ÀÌµ¿ ½Ã°£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    uint32_t moveDuration = 500; // ï¿½âº» ï¿½Ìµï¿½ ï¿½Ã°ï¿½
 
-	/* [Section 3] ½º¸¶Æ® ¿ÍÀÌÆÛ ½ÇÇà ·çÇÁ */
+	/* [Section 3] ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
 	for(;;) {
-		// FreeMASTER Åë½Å Ã³¸® (°¡Àå ¸ÕÀú È¤Àº °¡Àå ³ªÁß¿¡ ¹èÄ¡)
+		// FreeMASTER ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È¤ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½ï¿½Ä¡)
 		FMSTR_Poll();
 
 		currentTime = ms_ticks;
 
-		/* [STEP 1] ADC ÀÐ±â (°¡º¯ÀúÇ× °ª È¹µæ) */
+		/* [STEP 1] ADC ï¿½Ð±ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È¹ï¿½ï¿½) */
 		ADC_DRV_ConfigChan(INST_ADCONV1, 0U, &adConv1_ChnConfig0);
 		while(ADC_DRV_GetConvCompleteFlag(INST_ADCONV1, 0U) == false);
 		ADC_DRV_GetChanResult(INST_ADCONV1, 0U, &adcValue);
 
-		/* [STEP 2] ADC °ª¿¡ µû¸¥ »óÅÂ °áÁ¤ (¼³°è»ç¾ç¼­ ÁØ¼ö) */
+		/* [STEP 2] ADC ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ç¼­ ï¿½Ø¼ï¿½) */
 		if (controlSource == 0) {
-			/* [±âÁ¸ ·ÎÁ÷] °¡º¯ÀúÇ×(ADC) ´ëÀå ¸ðµå */
+			/* [ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ADC) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ */
 			if (adcValue < 500)       currentMode = MODE_OFF;
 			else if (adcValue < 2000) currentMode = MODE_INT;
 			else if (adcValue < 3500) currentMode = MODE_LOW;
 			else                      currentMode = MODE_HIGH;
 		}
 		else {
-			/* [»õ·Î¿î ·ÎÁ÷] PC(FreeMASTER) ´ëÀå ¸ðµå */
-			// PC¿¡¼­ pcModeRequest °ªÀ» ¹Ù²Ù¸é Áï½Ã ¿ÍÀÌÆÛ ¸ðµå°¡ ¹Ù²ò´Ï´Ù.
+			/* [ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½] PC(FreeMASTER) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ */
+			// PCï¿½ï¿½ï¿½ï¿½ pcModeRequest ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²Ù¸ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½å°¡ ï¿½Ù²ï¿½Ï´ï¿½.
 			currentMode = pcModeRequest;
 		}
 
-		/* [STEP 3] ºñÂ÷´Ü »óÅÂº° µ¿ÀÛ ¼öÇà */
+		/* [STEP 3] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Âºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
 		switch(currentMode) {
 			case MODE_OFF:
 				FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_0_DEG, 0U, true);
@@ -177,15 +177,15 @@ int main(void)
 			case MODE_HIGH:   moveDuration = 300; break;
 		}
 
-		// ¿ÍÀÌÆÛ ¿Õº¹ ·ÎÁ÷ (MODE_OFF°¡ ¾Æ´Ò ¶§¸¸ ÀÛµ¿)
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Õºï¿½ ï¿½ï¿½ï¿½ï¿½ (MODE_OFFï¿½ï¿½ ï¿½Æ´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ûµï¿½)
 		if (currentMode != MODE_OFF) {
-			// 1. ´ë±â »óÅÂ -> À§·Î ÀÌµ¿ ½ÃÀÛ
+			// 1. ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ -> ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½
 			if (currentStep == WIPER_IDLE) {
 				currentStep = WIPER_MOVING_UP;
 				lastTime = currentTime;
 				FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_140_DEG, 0U, true);
 			}
-			// 2. À§·Î ÀÌµ¿ ¿Ï·á Ã¼Å© -> ¾Æ·¡·Î ÀÌµ¿ ½ÃÀÛ
+			// 2. ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½Ï·ï¿½ Ã¼Å© -> ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½
 			else if (currentStep == WIPER_MOVING_UP) {
 				if (currentTime - lastTime >= moveDuration) {
 					currentStep = WIPER_MOVING_DOWN;
@@ -193,12 +193,12 @@ int main(void)
 					FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_0_DEG, 0U, true);
 				}
 			}
-			// 3. ¾Æ·¡·Î ÀÌµ¿ ¿Ï·á Ã¼Å© -> IDLE·Î º¹±Í (´ë±â ½Ã°£ Æ÷ÇÔ)
+			// 3. ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½Ï·ï¿½ Ã¼Å© -> IDLEï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½)
 			else if (currentStep == WIPER_MOVING_DOWN) {
 				uint32_t waitTarget = (currentMode == MODE_INT) ? (moveDuration + INT_WAIT_TIME) : moveDuration;
 
 				if (currentTime - lastTime >= waitTarget) {
-					currentStep = WIPER_IDLE; // ´Ù½Ã Ã³À½ºÎÅÍ ½ÃÀÛÇÒ ÁØºñ ¿Ï·á
+					currentStep = WIPER_IDLE; // ï¿½Ù½ï¿½ Ã³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Øºï¿½ ï¿½Ï·ï¿½
 				}
 			}
 		}
