@@ -1,193 +1,92 @@
-# 📘 S32K144 Embedded Study
+# 📘 S32K144 Embedded Systems Study: Smart Wiper Project
 
-**S32K144EVB-Q100 보드를 기반으로 MCU 기본기 → 드라이버 실습 → 디버깅 → (향후) AUTOSAR 구조 이해까지 학습하는 저장소입니다.**
-임베디드 초보자에서 실무 가능한 엔지니어로 성장하기 위한 실험 기록, 개념 정리, 예제 코드들을 포함합니다.
+This repository documents my journey from Linux-based C programming (42 Gyeongsan) to professional Automotive Embedded Software Engineering. It covers everything from basic MCU register control to building a high-level **Smart Wiper System** using the NXP S32K144EVB.
 
 ---
 
-## 📂 Repository Structure
+## 📂 Project Structure
 
-```
-s32k144-embedded-study
-│
-├── README.md                 # 현재 문서
-│
-├── docs/                     # MCU 개념, 주변장치 정리
-│   ├── MCU_basics.md
-│   ├── S32K144_Overview.md
-│   ├── Clock_System.md
-│   ├── GPIO.md
-│   ├── UART.md
-│   ├── ADC.md
-│   ├── Timer.md
-│   ├── Interrupts.md
-│   ├── Debugging.md
-│   └── Build_Process.md
-│
-├── board_notes/              # 실습 일지 및 트러블슈팅 기록
-│   ├── 2024-12-01-blinky.md
-│   ├── 2024-12-05-uart-echo.md
-│   └── …
-│
-├── examples/                 # MCU 실습 예제 코드
-│   ├── gpio_blink/
-│   │   ├── main.c
-│   │   └── README.md
-│   ├── uart_echo/
-│   ├── adc_read/
-│   └── timer_toggle/
-│
-├── s32ds_projects/           # S32 Design Studio 기반 전체 프로젝트
-│   └── gpio_blink_project/
-│
-└── assets/                   # 블록도, 이미지, 핀맵 등
-	├── s32k144_block_diagram.png
-	├── board_pinout.jpg
-	└── diagram.png
+```text
+.
+├── assets/                     # Datasheets, Schematics, and Reference Manuals (S32K-RM)
+├── board_notes/                # Step-by-step study logs and hardware theory
+│   ├── 00_gpio_output_led/
+│   ├── 01_freemaster_s32k144/
+│   ├── 02_RGB_color_mixer/
+│   └── 03_smart_wiper/         # Core Project: Current Development
+├── docs/                       # Environmental setup and prerequisite knowledge
+└── s32k_projects/              # S32 Design Studio (S32DS) Project Files
+    ├── LED_Blink_Red/          # Basic GPIO output
+    ├── freemaster_s32k144/     # FreeMASTER integration for debugging
+    ├── RGB_color_mixer/        # PWM control via FTM (FlexTimer)
+    └── smart_wiper/            # MAIN: ADC + PWM + Non-blocking logic
+
 ```
 
 ---
 
-# 🎯 Study Goals
+## 🏎️ Main Project: Smart Wiper System
 
-### ✔ 1. MCU 기본 구조 이해
+The goal of this project is to simulate a real-world automotive wiper system that adjusts its speed based on rain intensity (simulated via ADC/Potentiometer).
 
-레지스터, 메모리 맵, 클럭, IO 제어 등 **저수준 임베디드 기본기** 학습.
+### Key Features
 
-### ✔ 2. S32K144 주변장치 제어
+* **Non-blocking Logic**: Implemented using a **State Machine** (STOP, INT, LOW, HIGH) instead of `delay()` functions, allowing the MCU to handle multiple tasks concurrently.
+* **Hardware Integration**:
+* **ADC**: Reads rain intensity from the potentiometer.
+* **FTM (PWM)**: Controls the servo motor (wiper) speed and position.
+* **LPUART**: Communicates system status to the PC.
 
-GPIO / UART / Timer / ADC / PWM 등 실습.
 
-### ✔ 3. 디버깅 능력 강화
-
-* FreeMASTER
-* S32DS Debugger
-* 오실로스코프(가능한 경우)
-
-### ✔ 4. SDK와 드라이버 구조 이해
-
-* NXP S32 SDK 드라이버 구조
-* Pins Tool, Clocks Tool 사용법
-
-### ✔ 5. AUTOSAR 준비 (후반부)
-
-현재 단계에서는 MCU 중심.
-향후 다음 내용을 학습할 예정:
-
-* AUTOSAR Layer 구조 (ASW/BSW)
-* MCAL / BSW의 역할
-* RTE의 동작 원리
-* OS(Task / Event / Scheduling)
+* **Real-time Monitoring**: Integrated with **FreeMASTER** to visualize ADC values and state transitions in real-time.
 
 ---
 
-# 🧪 What’s Inside?
+## 📈 Engineering Roadmap (Industry-Focused)
 
-## 📘 docs/ – 개념 정리
+Designed to meet the technical requirements of Tier-1 automotive suppliers like **Valeo**.
 
-MCU 이해도를 완성시키는 핵심 문서 모음.
+### Phase 1: Feature Implementation (Current)
 
-예시:
+* Functional Smart Wiper using NXP S32 SDK.
+* Non-blocking state management.
 
-* **MCU_basics.md**
-  CPU, RAM, Flash, Bus, Peripherals 등 구조 설명
-* **Clock_System.md**
-  SIRC, FIRC, SOSC, SPLL 및 시스템 클럭 구성
-* **GPIO.md**
-  Port/Pin 구조 + 레지스터 기반 제어
-* **Debugging.md**
-  SWD, FreeMASTER, JTAG, Breakpoint 개념
+### Phase 2: Hardware Deep-Dive (Bare-metal)
 
----
+* Re-implementing SDK drivers by directly manipulating **Registers** (PCC, PORT, ADC, FTM).
+* Optimization using **Interrupts** and **DMA (Direct Memory Access)** to reduce CPU load.
 
-## 📝 board_notes/ – 실험 기록
+### Phase 3: Automotive Communication
 
-각 실습을 **목적 → 과정 → 문제 → 해결 → 다음 목표**로 정리.
+* Implementing **LIN (Local Interconnect Network)** for wiper/door control simulation.
+* Implementing **CAN (Controller Area Network)** for high-speed vehicle data exchange.
 
-예시:
+### Phase 4: Embedded OS (RTOS)
 
-```
-# UART Echo 실험 (2024-12-05)
-- 목적: LPUART 초기화 및 RX/TX 동작 확인
-- 문제: Baudrate mismatch로 garbage data 발생
-- 해결: Clock 설정 수정 및 oversampling 값 조정
-- 다음 목표: Interrupt 기반 UART로 확장
-```
+* Porting **FreeRTOS** to manage multiple automotive tasks (Control, Communication, Diagnosis).
+* Understanding AUTOSAR-like layered architecture (MCAL-BSW-RTE-ASW).
 
 ---
 
-## 💻 examples/ – MCU 실습 코드
+## 🛠 Tech Stack
 
-직접 작성한 최소 예제 코드 모음.
-
-예시:
-
-### gpio_blink/main.c
-
-* 포트 초기화
-* LED 토글
-* Delay loop
-  (향후 → PIT 기반으로 개량)
-
-### uart_echo/main.c
-
-* LPUART 초기화
-* RX → TX Loopback
+* **Hardware**: NXP S32K144EVB-Q100 (Cortex-M4F)
+* **IDE**: S32 Design Studio (S32DS) for ARM v2.2
+* **Debugger**: FreeMASTER, OpenSDA
+* **Language**: Embedded C
 
 ---
 
-## 🧰 s32ds_projects/
+## 📝 Study Philosophy (From 42 Gyeongsan to Embedded)
 
-S32 Design Studio로 생성한 전체 프로젝트 폴더
-(컴파일 가능 상태 유지)
-
-회사 코드나 AUTOSAR 설정 파일은 포함하지 않음.
-
----
-
-# 🚀 How I Study
-
-1. **공식 Reference 문서를 읽고 정리**
-
-   * S32K144 RM (Reference Manual)
-   * EVB User Manual
-   * SDK API Docs
-
-2. **간단한 예제 먼저 작성**
-
-   * GPIO → Timer → UART → ADC 순서
-
-3. **문제 발생 시 ‘왜?’를 기준으로 디버깅**
-
-   * Clock이 켜졌는가?
-   * Pin mux는 맞는가?
-   * Interrupt enable 됐는가?
-
-4. **정리한 내용 GitHub에 업로드**
-
-   * docs/ 에 개념 정리
-   * examples/ 에 동작 코드
-   * board_notes/ 에 실험 내역
+* **Understanding MMIO**: Connecting C pointers to physical memory addresses (Registers).
+* **Manual Reference**: Prioritizing the **S32K1xx Reference Manual** over generic tutorials.
+* **Data-Driven**: Every system state must be visible and measurable via FreeMASTER.
 
 ---
 
-# 📌 Future Work
+## 📎 References
 
-* PWM / FTM 실습 추가
-* Interrupt 기반 UART
-* Simple Scheduler (Pre-AUTOSAR OS)
-* FreeMASTER 변수 모니터링
-* AUTOSAR Layer 구조 문서 정리
-* MCAL 개념 학습
-
----
-
-# 📎 References
-
-* NXP S32K144EVB-Q100 Official Page
-* S32 Design Studio for ARM
-* S32K ARM MCU Reference Manual
-* FreeMASTER User Guide
-* AUTOSAR Specification (high-level)
-
----
+* [S32K1xx Series Reference Manual](https://www.google.com/search?q=assets/S32K-RM.pdf)
+* [S32K144EVB Schematic](https://www.google.com/search?q=assets/NXP_S32K144EVB_SCH.pdf)
+* [AN5413: S32K1xx Series Cookbook](https://www.google.com/search?q=assets/AN5413.pdf)
