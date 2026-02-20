@@ -35,3 +35,39 @@ S32K144EVB 보드와 외부 하드웨어(서보모터, 가변저항)를 연동�
 - [x] ADC 및 PWM 드라이버 설정 (S32DS)
 - [x] 모드 전환 로직 및 서보모터 구동 코드 작성
 - [x] FreeMASTER 인터페이스 구성 및 최종 디버깅
+
+## 3. System Architecture (시스템 구성)
+
+본 프로젝트는 **입력(Sensor) - 제어(Controller) - 출력(Actuator)**의 전형적인 임베디드 제어 루프를 따릅니다.
+
+1.  **Input (Rain Sensor Simulation):** 가변저항(Potentiometer)을 통해 빗물의 양을 아날로그 전압($0 \sim 5V$)으로 모사합니다.
+2.  **Processing (MCU):**
+    *   **ADC:** 아날로그 전압을 디지털 값($0 \sim 4095$)으로 변환합니다.
+    *   **State Machine:** 빗물의 양에 따라 와이퍼의 동작 모드(OFF/INT/LOW/HIGH)를 결정합니다.
+3.  **Output (Wiper Motor):** 결정된 모드에 맞춰 서보모터의 각도를 제어하기 위한 PWM 신호를 생성합니다.
+
+## 4. Software Implementation (소프트웨어 로직)
+
+### 4.1. Finite State Machine (FSM) 설계
+빗물 감지량(ADC 값)에 따라 4가지 상태로 구분하여 와이퍼를 제어합니다.
+
+| 모드 (State) | 조건 (ADC Range) | 동작 설명 |
+| :--- | :--- | :--- |
+| **OFF** | $0 \sim 1000$ | 와이퍼 정지 (Parking Position, 0°) |
+| **INT** (Intermittent) | $1001 \sim 2000$ | 간헐적 동작 (일정 주기마다 1회 왕복) |
+| **LOW** | $2001 \sim 3000$ | 저속 연속 동작 |
+| **HIGH** | $3001 \sim 4095$ | 고속 연속 동작 |
+
+### 4.2. Servo Motor Control Algorithm
+서보모터(SG-90)는 PWM 신호의 **Duty Cycle(High 구간의 시간)**에 따라 회전 각도가 결정됩니다.
+
+*   **PWM 주기:** 20ms (50Hz)
+*   **각도 제어:**
+    *   $0^\circ \rightarrow 0.5ms$ (Duty 2.5%)
+    *   $90^\circ \rightarrow 1.5ms$ (Duty 7.5%)
+    *   $180^\circ \rightarrow 2.5ms$ (Duty 12.5%)
+*   **구현:** S32K144의 FTM0 모듈을 사용하여 정밀한 PWM 파형을 생성하고, `FTM_DRV_UpdatePwmChannel` 함수로 듀티를 실시간 업데이트합니다.
+
+[] 딜레이로직 -> 비차단로직 -> 인터럽트 & DMA 로 가는 설명도 넣어야할듯
+[] 프로젝트에서 사용된 기본 이론 정리
+[] bare-metal 구현한 것
