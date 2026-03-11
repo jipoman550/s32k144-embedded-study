@@ -70,8 +70,6 @@ EDMA_DRV_ConfigSingleBlockTransfer(0U,
     * **원인**: 컴파일러 최적화로 인해 CPU가 RAM을 확인하지 않고 레지스터에 캐싱된 이전 값(0)만 사용하여 발생.
     * **해결**: `volatile uint16_t adcValue;`로 선언하여 매번 메모리 주소에서 최신 값을 읽어오도록 강제함.
 
-
-
 * **DBE (Destination Bus Error) 및 HardFault**
     * **문제**: DMA 동작 시작 시 즉시 `JumpToSelf(HardFault)` 상태로 빠짐.
     * **원인**:
@@ -80,6 +78,12 @@ EDMA_DRV_ConfigSingleBlockTransfer(0U,
     * **해결**:
         1.  `MPU->CESR = 0;` 코드를 추가하여 보호 기능을 비활성화.
         2.  전송 모드를 `EDMA_TRANSFER_PERIPH2PERIPH`로 설정하여 목적지 주소를 단일 변수 주소로 고정.
+
+* **NCE (Non-configured Channel Error)**
+
+	* **현상**: DMA 채널 가동 시 `ERQ`(Enable Request) 비트가 즉시 `0`으로 돌아가며 에러 발생.
+	* **원인**: TCD(Transfer Control Descriptor) 설계도를 수동으로 작성하는 과정에서 `BITER`, `CITER` 등 내부 루프 카운트 설정이 하드웨어 규격과 맞지 않음.
+	* **해결**: SDK가 제공하는 안전한 함수인 `EDMA_DRV_ConfigSingleBlockTransfer()`로 교체하여 해결.
 
 ### 4. 하드웨어 물리적 이슈
 
