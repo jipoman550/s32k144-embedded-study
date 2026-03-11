@@ -59,6 +59,8 @@ uint32_t currentTime = 0;
 uint32_t lastTime = 0;
 volatile uint32_t ms_ticks = 0; // 1ms마다 1씩 증가할 실제 시계 (틱)
 
+volatile uint32_t loop_cnt = 0; // 미터기 변수
+
 /* [추가] 제어권 및 PC 명령 변수 */
 volatile uint8_t controlSource = 0;    // 0: 가변저항(ADC) 제어, 1: PC(FreeMASTER) 제어
 volatile WiperMode_t pcModeRequest = MODE_OFF; // PC에서 요청한 모드 저장용
@@ -144,6 +146,8 @@ int main(void)
 		// FreeMASTER 통신 처리 (가장 먼저 혹은 가장 나중에 배치)
 		FMSTR_Poll();
 
+		loop_cnt++; // 루프를 몇번 도는지
+
 		currentTime = ms_ticks;
 
 		/* [STEP 1] ADC 읽기 (가변저항 값 획득) */
@@ -173,7 +177,7 @@ int main(void)
 				break;
 
 			case MODE_INT:    moveDuration = 500; break;
-			case MODE_LOW:    moveDuration = 800; break;
+			case MODE_LOW:    moveDuration = 2000; break;
 			case MODE_HIGH:   moveDuration = 300; break;
 			// default
 		}

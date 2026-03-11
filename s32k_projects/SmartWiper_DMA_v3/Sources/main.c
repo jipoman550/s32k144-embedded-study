@@ -59,6 +59,8 @@ uint32_t currentTime = 0;
 uint32_t lastTime = 0;
 volatile uint32_t ms_ticks = 0;
 
+volatile uint32_t loop_cnt = 0; // 미터기 변수
+
 volatile uint8_t controlSource = 0;    /* 0: 가변저항, 1: PC(FreeMASTER) */
 volatile WiperMode_t pcModeRequest = MODE_OFF;
 
@@ -93,7 +95,7 @@ int main(void)
   /*** End of Processor Expert internal initialization.                    ***/
 
   /* MPU(메모리 보호 유닛)를 비활성화하여 DMA의 RAM 접근권을 허용합니다. */
-  MPU->CESR &= ~MPU_CESR_VLD_MASK;
+  //MPU->CESR &= ~MPU_CESR_VLD_MASK;
 
   /* --- [1. 하드웨어 기본 초기화] --- */
   CLOCK_SYS_Init(g_clockManConfigsArr, CLOCK_MANAGER_CONFIG_CNT, g_clockManCallbacksArr, CLOCK_MANAGER_CALLBACK_CNT);
@@ -154,6 +156,9 @@ int main(void)
   /* --- [스마트 와이퍼 실행 루프] --- */
   for(;;) {
     FMSTR_Poll();
+
+    loop_cnt++; // 루프를 몇번 도는지(polling vs dma 성능차이 보기 위함)
+
     currentTime = ms_ticks;
 
     /* * [DMA의 이점]
@@ -162,17 +167,33 @@ int main(void)
      */
 
     /* [STEP 1] 모드 결정 로직 */
-    if (controlSource == 0) {
-        if (adcValue < 500)       currentMode = MODE_OFF;
-        else if (adcValue < 2000)  currentMode = MODE_INT;
-        else if (adcValue < 3500)  currentMode = MODE_LOW;
-        else                       currentMode = MODE_HIGH;
-    } else {
+    if (controlSource == 0)
+    {
+        if (adcValue < 500)
+        {
+        	currentMode = MODE_OFF;
+        }
+        else if (adcValue < 2000)
+        {
+        	currentMode = MODE_INT;
+        }
+        else if (adcValue < 3500)
+        {
+        	currentMode = MODE_LOW;
+        }
+        else
+        {
+        	currentMode = MODE_HIGH;
+        }
+    }
+    else
+    {
         currentMode = pcModeRequest;
     }
 
     /* [STEP 2] 상태별 동작 수행 (Non-blocking State Machine) */
-    switch(currentMode) {
+    switch(currentMode)
+    {
         case MODE_OFF:
             FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_0_DEG, 0U, true);
             currentStep = WIPER_IDLE;
@@ -183,28 +204,37 @@ int main(void)
     }
 
     /* [STEP 3] 와이퍼 왕복 제어 */
-    if (currentMode != MODE_OFF) {
-        if (currentStep == WIPER_IDLE) {
+    if (currentMode != MODE_OFF)
+    {
+        if (currentStep == WIPER_IDLE)
+        {
             currentStep = WIPER_MOVING_UP;
             lastTime = currentTime;
             FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_140_DEG, 0U, true);
         }
-        else if (currentStep == WIPER_MOVING_UP) {
-            if (currentTime - lastTime >= moveDuration) {
+        else if (currentStep == WIPER_MOVING_UP)
+        {
+            if (currentTime - lastTime >= moveDuration)
+            {
                 currentStep = WIPER_MOVING_DOWN;
                 lastTime = currentTime;
                 FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_0_DEG, 0U, true);
             }
         }
-        else if (currentStep == WIPER_MOVING_DOWN) {
+        else if (currentStep == WIPER_MOVING_DOWN)
+        {
             uint32_t waitTarget = (currentMode == MODE_INT) ? (moveDuration + INT_WAIT_TIME) : moveDuration;
-            if (currentTime - lastTime >= waitTarget) {
+            if (currentTime - lastTime >= waitTarget)
+            {
                 currentStep = WIPER_IDLE;
             }
         }
     }
 
-    if(exit_code != 0) break;
+    if(exit_code != 0)
+    {
+    	break;
+    }
   }
 
   /*** Don't write any code pass this line, or it will be deleted during code generation. ***/
