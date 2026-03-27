@@ -23,13 +23,13 @@ graph TD
         ADC[ADC Module<br>아날로그 데이터 수집]
         DMA[eDMA<br>데이터 메모리 복사]
         MEM[(Memory<br>데이터 버퍼)]
-        
+
         LPIT[LPIT Timer<br>10ms 주기 제어 인터럽트]
         SM[Wiper State Machine<br>메인 제어 로직]
-        
+
         FTM[FTM Module<br>PWM 신호 생성]
         LPUART[LPUART Module<br>시리얼 통신]
-        
+
         CAN_TX[FlexCAN TX<br>데이터 송신]
         CAN_RX[FlexCAN RX<br>데이터 수신]
     end
@@ -39,27 +39,27 @@ graph TD
     ADC -- 자동 전송 --> DMA
     DMA --> MEM
     MEM --> SM
-    
+
     LPIT -- 타이머 틱 --> SM
-    
+
     SM -- Duty 제어 --> FTM
     FTM -- PWM 신호 --> SERVO
-    
+
     SM <-- 데이터 송수신 --> LPUART
     LPUART <--> PC
-    
+
     SM -- 전송 데이터 (Mode, Step, ADC) --> CAN_TX
     CAN_RX -- 수신 데이터 검증 --> SM
-    
+
     %% CAN Loopback 흐름
     CAN_TX -. Internal Loopback (내부 루프백) .-> CAN_RX
-    
+
     %% 스타일링 (글자색 진하게 강제 적용)
     classDef default color:#000;
     classDef hardware fill:#eef,stroke:#333,stroke-width:2px,color:#000,font-weight:bold;
     classDef mcu fill:#fff,stroke:#007,stroke-width:1px,stroke-dasharray: 5 5,color:#000;
     classDef module fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#000,font-weight:bold;
-    
+
     class VR,SERVO,PC hardware;
     class ADC,DMA,MEM,LPIT,SM,FTM,LPUART,CAN_TX,CAN_RX module;
 ```
@@ -71,7 +71,6 @@ graph TD
 1대의 테스트 보드에서 CAN 통신을 하기 위해서는 추가적인 보드 없이 내부적으로 신호를 되돌려받는 **Loopback(루프백)** 모드를 사용해야 합니다.
 
 ### ① 하드웨어 설정 (Hardware Setup)
-* **12V 외부 전원 공급 필수**: S32K144 EVB에는 CAN 통신에 관여하는 SBC(System Basis Chip, UJA1169)가 실장되어 있습니다. 이 SBC 칩을 구동하고 CAN 트랜시버를 활성화하려면 USB 전원(5V)만으로는 불가능하며, **반드시 12V 어댑터를 보드의 배럴잭(또는 VIN)에 연결**해야 정상적으로 초기화됩니다. 12V 전원이 없으면 CAN 초기화나 통신 과정에서 오류가 발생할 수 있습니다.
 * **배선 연결 생략**: 루프백 모드에서는 MCU 내부에서 TX가 RX로 직접 연결되므로, 핀(CAN_H, CAN_L)에 점퍼선을 달거나 종단 저항(Terminal Resistor)을 꽂지 않아도 테스트가 가능합니다.
 
 ### ② 소프트웨어 설정 (Software Setup - Processor Expert)
