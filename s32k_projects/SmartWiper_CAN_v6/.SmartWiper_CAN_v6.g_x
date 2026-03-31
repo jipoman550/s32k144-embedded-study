@@ -89,7 +89,7 @@
       <File Name="SDK/platform/devices/startup.c" FileDate="2026-03-24, 14:05:31" FileAge="1774328731430" FileType="1048576" CompNumb="1" />
       <File Name="SDK/platform/devices/S32K144/startup/system_S32K144.h" FileDate="2026-03-24, 14:05:31" FileAge="1774328731448" FileType="1048576" CompNumb="1" />
       <File Name="SDK/platform/drivers/src/ftm/ftm_hw_access.h" FileDate="2026-03-24, 14:05:30" FileAge="1774328730652" FileType="1048576" CompNumb="7" />
-      <File Name="Sources/main.c" FileDate="2026-03-27, 12:54:27" FileAge="1774583667282" FileType="128" />
+      <File Name="Sources/main.c" FileDate="2026-03-30, 14:16:35" FileAge="1774847795862" FileType="128" />
       <File Name="SDK/platform/drivers/src/clock/S32K1xx/sim_hw_access.h" FileDate="2026-03-24, 14:05:30" FileAge="1774328730392" FileType="1048576" CompNumb="3" />
       <File Name="Generated_Code/watchdog1.h" FileDate="2026-03-24, 14:05:31" FileAge="1774328731618" FileType="45637" CompNumb="14" />
       <File Name="SDK/platform/devices/S32K144/startup/system_S32K144.c" FileDate="2026-03-24, 14:05:31" FileAge="1774328731464" FileType="1048576" CompNumb="1" />
@@ -106,9 +106,9 @@
       <File Name="SDK/platform/drivers/src/clock/S32K1xx/clock_S32K1xx.h" FileDate="2026-03-24, 14:05:30" FileAge="1774328730278" FileType="1048576" CompNumb="3" />
       <File Name="SDK/platform/drivers/inc/ftm_pwm_driver.h" FileDate="2026-03-24, 14:05:30" FileAge="1774328730715" FileType="1048576" CompNumb="7" />
       <File Name="SDK/platform/drivers/inc/edma_driver.h" FileDate="2026-03-24, 14:05:30" FileAge="1774328730866" FileType="1048576" CompNumb="9" />
-      <File Name="Generated_Code/dmaController1.c" FileDate="2026-03-24, 14:05:31" FileAge="1774328731662" FileType="45637" CompNumb="9" />
+      <File Name="Generated_Code/dmaController1.c" FileDate="2026-03-30, 14:16:35" FileAge="1774847795837" FileType="45637" CompNumb="9" />
       <File Name="SDK/platform/drivers/src/clock/S32K1xx/clock_S32K1xx.c" FileDate="2026-03-24, 14:05:30" FileAge="1774328730246" FileType="1048576" CompNumb="3" />
     </GeneratedByPE>
   </GeneratedFilesList>
-  <CodeGenReference>4</CodeGenReference>
+  <CodeGenReference>6</CodeGenReference>
 </CodeGenerationInfo>

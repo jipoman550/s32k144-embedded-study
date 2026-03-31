@@ -7,7 +7,7 @@
 **     Version     : Component 1.2.0, Driver 1.4, CPU db: 3.00.000
 **     Repository  : SDK_S32K1xx_15
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2026-03-18, 10:23, # CodeGen: 4
+**     Date/Time   : 2026-03-29, 23:05, # CodeGen: 6
 **     Abstract    :
 **
 **
@@ -75,6 +75,32 @@
 /*! @brief Array of pin configuration structures */
 pin_settings_config_t g_pin_mux_InitConfigArr[NUM_OF_CONFIGURED_PINS] =
 {
+    {
+        .base          = PORTE,
+        .pinPortIdx    = 5u,
+        .pullConfig    = PORT_INTERNAL_PULL_NOT_ENABLED,
+        .passiveFilter = false,
+        .driveSelect   = PORT_LOW_DRIVE_STRENGTH,
+        .mux           = PORT_MUX_ALT5,
+        .pinLock       = false,
+        .intConfig     = PORT_DMA_INT_DISABLED,
+        .clearIntFlag  = false,
+        .gpioBase      = NULL,
+        .digitalFilter = false,
+    },
+    {
+        .base          = PORTE,
+        .pinPortIdx    = 4u,
+        .pullConfig    = PORT_INTERNAL_PULL_NOT_ENABLED,
+        .passiveFilter = false,
+        .driveSelect   = PORT_LOW_DRIVE_STRENGTH,
+        .mux           = PORT_MUX_ALT5,
+        .pinLock       = false,
+        .intConfig     = PORT_DMA_INT_DISABLED,
+        .clearIntFlag  = false,
+        .gpioBase      = NULL,
+        .digitalFilter = false,
+    },
     {
         .base          = PORTD,
         .pinPortIdx    = 14u,

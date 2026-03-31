@@ -1,157 +1,144 @@
 /*
  * [FILE] main.c
- * [ROLE] ½º¸¶Æ® ¿ÍÀÌÆÛ ½Ã½ºÅÛÀÇ ¸ŞÀÎ Á¦¾î ¸ğµâ
+ * [ROLE] ìŠ¤ë§ˆíŠ¸ ì™€ì´í¼ ì‹œìŠ¤í…œì˜ ë©”ì¸ ì œì–´ ëª¨ë“ˆ
  * [VERSION] v4 (LPIT Interrupt & DMA Integration)
  * [AUTHOR] S32K144 Embedded Mentor
  */
 
-/* ---------------------------------------------------------------- ÇÁ·ÎÁ§Æ® Çì´õ Æ÷ÇÔ */
+/* ---------------------------------------------------------------- í”„ë¡œì íŠ¸
+ * í—¤ë” í¬í•¨ */
 #include "Cpu.h"
-#include "clockMan1.h"
-#include "pin_mux.h"
 #include "adConv1.h"
-#include "flexTimer_pwm1.h"
-#include "osif.h"
-#include "freemaster.h"
+#include "clockMan1.h"
 #include "dmaController1.h"
+#include "flexTimer_pwm1.h"
+#include "freemaster.h"
 #include "lpit1.h"
+#include "osif.h"
+#include "pin_mux.h"
+
 
 volatile int exit_code = 0;
 
-/* ---------------------------------------------------------------- Àü¿ª »ó¼ö ¹× Á¤ÀÇ */
-#define POS_0_DEG      (800U)   /* ¼­º¸¸ğÅÍ 0µµ À§Ä¡ (PWM Duty) */
-#define POS_140_DEG    (3300U)  /* ¼­º¸¸ğÅÍ 140µµ À§Ä¡ (PWM Duty) */
-#define INT_WAIT_TIME  (3000U)  /* °£ÇæÀû ¸ğµå(INT) ´ë±â ½Ã°£ (3000ms) */
+/* ---------------------------------------------------------------- ì „ì—­ ìƒìˆ˜ ë°
+ * ì •ì˜ */
+#define POS_0_DEG (800U)      /* ì„œë³´ëª¨í„° 0ë„ ìœ„ì¹˜ (PWM Duty) */
+#define POS_140_DEG (3300U)   /* ì„œë³´ëª¨í„° 140ë„ ìœ„ì¹˜ (PWM Duty) */
+#define INT_WAIT_TIME (3000U) /* ê°„í—ì  ëª¨ë“œ(INT) ëŒ€ê¸° ì‹œê°„ (3000ms) */
 
-/* ---------------------------------------------------------------- »ç¿ëÀÚ Á¤ÀÇ ÀÚ·áÇü */
-typedef enum
-{
-    MODE_OFF  = 0U,
-    MODE_INT  = 1U,
-    MODE_LOW  = 2U,
-    MODE_HIGH = 3U
+/* ---------------------------------------------------------------- ì‚¬ìš©ì ì •ì˜
+ * ìë£Œí˜• */
+typedef enum {
+  MODE_OFF = 0U,
+  MODE_INT = 1U,
+  MODE_LOW = 2U,
+  MODE_HIGH = 3U
 } WiperMode_t;
 
-typedef enum
-{
-    WIPER_IDLE         = 0U,
-    WIPER_MOVING_UP    = 1U,
-    WIPER_MOVING_DOWN  = 2U
+typedef enum {
+  WIPER_IDLE = 0U,
+  WIPER_MOVING_UP = 1U,
+  WIPER_MOVING_DOWN = 2U
 } WiperStep_t;
 
-/* ---------------------------------------------------------------- Àü¿ª º¯¼ö ¼³Á¤ */
+/* ---------------------------------------------------------------- ì „ì—­ ë³€ìˆ˜
+ * ì„¤ì • */
 static volatile WiperMode_t currentMode = MODE_OFF;
 static volatile WiperStep_t currentStep = WIPER_IDLE;
 static ftm_state_t ftmStateStruct;
 
-/* DMA(¹è´ŞºÎ)°¡ ADC0 °á°ú¸¦ ½Ç½Ã°£À¸·Î º¹»çÇØ¿Ã ¸ñÀûÁö ÁÖ¼Ò */
+/* DMA(ë°°ë‹¬ë¶€)ê°€ ADC0 ê²°ê³¼ë¥¼ ì‹¤ì‹œê°„ìœ¼ë¡œ ë³µì‚¬í•´ì˜¬ ëª©ì ì§€ ì£¼ì†Œ */
 volatile uint16_t adcValue = 0U;
 
-/* ½Ã½ºÅÛ ¸ğ´ÏÅÍ¸µ¿ë º¯¼ö */
+/* ì‹œìŠ¤í…œ ëª¨ë‹ˆí„°ë§ìš© ë³€ìˆ˜ */
 volatile uint32_t ms_ticks = 0U;
 volatile uint32_t loop_cnt = 0U;
 
-/* FreeMASTER °üÂûÀ» À§ÇØ Àü¿ªÀ¸·Î »« Ä«¿îÅÍ */
-//volatile uint32_t stepCounter = 0U;
+/* FreeMASTER ê´€ì°°ì„ ìœ„í•´ ì „ì—­ìœ¼ë¡œ ëº€ ì¹´ìš´í„° */
+// volatile uint32_t stepCounter = 0U;
 
-/* Åë½Å(FreeMASTER) Á¦¾î¿ë º¯¼ö */
-volatile uint8_t controlSource = 0U;     /* 0: °¡º¯ÀúÇ×, 1: PC Á¦¾î */
+/* í†µì‹ (FreeMASTER) ì œì–´ìš© ë³€ìˆ˜ */
+volatile uint8_t controlSource = 0U; /* 0: ê°€ë³€ì €í•­, 1: PC ì œì–´ */
 volatile WiperMode_t pcModeRequest = MODE_OFF;
 
-/* ---------------------------------------------------------------- ÀÎÅÍ·´Æ® ¼­ºñ½º ·çÆ¾ */
-void LPIT0_Ch0_IRQHandler(void)
-{
-    /* [ROLE 1] ÀÎÅÍ·´Æ® ÇÃ·¡±× Å¬¸®¾î */
-    LPIT_DRV_ClearInterruptFlagTimerChannels(INST_LPIT1, (1U << 0U));
+/* ---------------------------------------------------------------- ì¸í„°ëŸ½íŠ¸
+ * ì„œë¹„ìŠ¤ ë£¨í‹´ */
+void LPIT0_Ch0_IRQHandler(void) {
+  /* [ROLE 1] ì¸í„°ëŸ½íŠ¸ í”Œë˜ê·¸ í´ë¦¬ì–´ */
+  LPIT_DRV_ClearInterruptFlagTimerChannels(INST_LPIT1, (1U << 0U));
 
-    ms_ticks += 10U;
+  ms_ticks += 10U;
 
-    /* [ROLE 2] ÀÔ·Â µ¥ÀÌÅÍ ±â¹İ ¸ğµå °áÁ¤ (Input Logic) */
-    if (controlSource == 0U)
-    {
-        if (adcValue < 500U)
-        {
-            currentMode = MODE_OFF;
-        }
-        else if (adcValue < 2000U)
-        {
-            currentMode = MODE_INT;
-        }
-        else if (adcValue < 3500U)
-        {
-            currentMode = MODE_LOW;
-        }
-        else
-        {
-            currentMode = MODE_HIGH;
-        }
+  /* [ROLE 2] ì…ë ¥ ë°ì´í„° ê¸°ë°˜ ëª¨ë“œ ê²°ì • (Input Logic) */
+  if (controlSource == 0U) {
+    if (adcValue < 500U) {
+      currentMode = MODE_OFF;
+    } else if (adcValue < 2000U) {
+      currentMode = MODE_INT;
+    } else if (adcValue < 3500U) {
+      currentMode = MODE_LOW;
+    } else {
+      currentMode = MODE_HIGH;
     }
-    else
-    {
-        currentMode = pcModeRequest;
+  } else {
+    currentMode = pcModeRequest;
+  }
+
+  /* [ROLE 3] ì™€ì´í¼ êµ¬ë™ ìƒíƒœ ë¨¸ì‹  (Control Logic) */
+  static uint32_t stepCounter = 0U;
+  uint32_t moveDuration = 0U;
+
+  if (currentMode == MODE_OFF) {
+    (void)FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U,
+                                   FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_0_DEG, 0U,
+                                   true);
+    currentStep = WIPER_IDLE;
+    stepCounter = 0U;
+  } else {
+    if (currentMode == MODE_INT) {
+      moveDuration = 500U;
+    } else if (currentMode == MODE_LOW) {
+      moveDuration = 800U;
+    } else {
+      moveDuration = 300U;
     }
 
-    /* [ROLE 3] ¿ÍÀÌÆÛ ±¸µ¿ »óÅÂ ¸Ó½Å (Control Logic) */
-    static uint32_t stepCounter = 0U;
-    uint32_t moveDuration = 0U;
+    if (currentStep == WIPER_IDLE) {
+      currentStep = WIPER_MOVING_UP;
+      stepCounter = 0U;
+      (void)FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U,
+                                     FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_140_DEG,
+                                     0U, true);
+    }
 
-    if (currentMode == MODE_OFF)
-    {
-        (void)FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_0_DEG, 0U, true);
+    stepCounter +=
+        10U; // ì–˜ëŠ” ì™œ ì—¬ê¸°ì— ìˆì–´ì•¼ í•˜ëŠ”ê±°ì§€? ë‹¤ë¥¸ ê³³ì— ìˆìœ¼ë©´ ì•ˆë˜ëƒ?
+
+    if (currentStep == WIPER_MOVING_UP) {
+      if (stepCounter >= moveDuration) {
+        currentStep = WIPER_MOVING_DOWN;
+        stepCounter = 0U;
+        (void)FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U,
+                                       FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_0_DEG,
+                                       0U, true);
+      }
+    } else if (currentStep == WIPER_MOVING_DOWN) {
+      uint32_t waitTarget = (currentMode == MODE_INT)
+                                ? (moveDuration + INT_WAIT_TIME)
+                                : moveDuration;
+
+      if (stepCounter >= waitTarget) {
         currentStep = WIPER_IDLE;
         stepCounter = 0U;
+      }
+    } else {
+      currentStep = WIPER_IDLE;
     }
-    else
-    {
-        if (currentMode == MODE_INT)
-        {
-            moveDuration = 500U;
-        }
-        else if (currentMode == MODE_LOW)
-        {
-            moveDuration = 800U;
-        }
-        else
-        {
-            moveDuration = 300U;
-        }
-
-        if (currentStep == WIPER_IDLE)
-        {
-            currentStep = WIPER_MOVING_UP;
-            stepCounter = 0U;
-            (void)FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_140_DEG, 0U, true);
-        }
-
-        stepCounter += 10U; // ¾ê´Â ¿Ö ¿©±â¿¡ ÀÖ¾î¾ß ÇÏ´Â°ÅÁö? ´Ù¸¥ °÷¿¡ ÀÖÀ¸¸é ¾ÈµÇ³Ä?
-
-        if (currentStep == WIPER_MOVING_UP)
-        {
-            if (stepCounter >= moveDuration)
-            {
-                currentStep = WIPER_MOVING_DOWN;
-                stepCounter = 0U;
-                (void)FTM_DRV_UpdatePwmChannel(INST_FLEXTIMER_PWM1, 0U, FTM_PWM_UPDATE_IN_DUTY_CYCLE, POS_0_DEG, 0U, true);
-            }
-        }
-        else if (currentStep == WIPER_MOVING_DOWN)
-        {
-            uint32_t waitTarget = (currentMode == MODE_INT) ? (moveDuration + INT_WAIT_TIME) : moveDuration;
-
-            if (stepCounter >= waitTarget)
-            {
-                currentStep = WIPER_IDLE;
-                stepCounter = 0U;
-            }
-        }
-        else
-        {
-            currentStep = WIPER_IDLE;
-        }
-    }
+  }
 }
 
-/* User includes (#include below this line is not maintained by Processor Expert) */
+/* User includes (#include below this line is not maintained by Processor
+ * Expert) */
 
 /*!
   \brief The main function for the project.
@@ -159,72 +146,73 @@ void LPIT0_Ch0_IRQHandler(void)
  * - startup asm routine
  * - main()
 */
-int main(void)
-{
-  /* Write your local variable definition here */
+int main(void) {
+/* Write your local variable definition here */
 
-  /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
-  #ifdef PEX_RTOS_INIT
-    PEX_RTOS_INIT();                   /* Initialization of the selected RTOS. Macro is defined by the RTOS component. */
-  #endif
+/*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
+#ifdef PEX_RTOS_INIT
+  PEX_RTOS_INIT(); /* Initialization of the selected RTOS. Macro is defined by
+                      the RTOS component. */
+#endif
   /*** End of Processor Expert internal initialization.                    ***/
 
-    /* [STEP 2] ½Ã½ºÅÛ Å¬·° ¹× ÇÉ ÃÊ±âÈ­ */
-    (void)CLOCK_SYS_Init(g_clockManConfigsArr, CLOCK_MANAGER_CONFIG_CNT, g_clockManCallbacksArr, CLOCK_MANAGER_CALLBACK_CNT);
-    (void)CLOCK_SYS_UpdateConfiguration(0U, CLOCK_MANAGER_POLICY_AGREEMENT);
-    (void)PINS_DRV_Init(NUM_OF_CONFIGURED_PINS, g_pin_mux_InitConfigArr);
+  /* [STEP 2] ì‹œìŠ¤í…œ í´ëŸ­ ë° í•€ ì´ˆê¸°í™” */
+  (void)CLOCK_SYS_Init(g_clockManConfigsArr, CLOCK_MANAGER_CONFIG_CNT,
+                       g_clockManCallbacksArr, CLOCK_MANAGER_CALLBACK_CNT);
+  (void)CLOCK_SYS_UpdateConfiguration(0U, CLOCK_MANAGER_POLICY_AGREEMENT);
+  (void)PINS_DRV_Init(NUM_OF_CONFIGURED_PINS, g_pin_mux_InitConfigArr);
 
-    /* [STEP 3] eDMA ¿£Áø °¡µ¿ */
-    (void)EDMA_DRV_Init(&dmaController1_State, &dmaController1_InitConfig0, edmaChnStateArray, edmaChnConfigArray, 1U);
+  /* [STEP 3] eDMA ì—”ì§„ ê°€ë™ */
+  (void)EDMA_DRV_Init(&dmaController1_State, &dmaController1_InitConfig0,
+                      edmaChnStateArray, edmaChnConfigArray, 1U);
 
-    /* [STEP 4] ADC ¹× DMA µ¥ÀÌÅÍ ¹è´Ş °æ·Î ¼³Á¤ */
-    ADC_DRV_ConfigConverter(INST_ADCONV1, &adConv1_ConvConfig0);
-    (void)EDMA_DRV_ConfigSingleBlockTransfer(0U,
-    										EDMA_TRANSFER_PERIPH2PERIPH,
-                                            (uint32_t)&(ADC0->R[0]),
-											(uint32_t)&adcValue,
-                                            EDMA_TRANSFER_SIZE_2B,
-											2U);
-    (void)EDMA_DRV_StartChannel(0U);
-    ADC_DRV_ConfigChan(INST_ADCONV1, 0U, &adConv1_ChnConfig0);
+  /* [STEP 4] ADC ë° DMA ë°ì´í„° ë°°ë‹¬ ê²½ë¡œ ì„¤ì • */
+  ADC_DRV_ConfigConverter(INST_ADCONV1, &adConv1_ConvConfig0);
+  (void)EDMA_DRV_ConfigSingleBlockTransfer(
+      0U, EDMA_TRANSFER_PERIPH2PERIPH, (uint32_t)&(ADC0->R[0]),
+      (uint32_t)&adcValue, EDMA_TRANSFER_SIZE_2B, 2U);
+  (void)EDMA_DRV_StartChannel(0U);
+  ADC_DRV_ConfigChan(INST_ADCONV1, 0U, &adConv1_ChnConfig0);
 
-    /* [STEP 5] Å¸ÀÌ¸Ó(PWM/LPIT) ¹× Åë½Å ÃÊ±âÈ­ */
-    (void)FTM_DRV_Init(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_InitConfig, &ftmStateStruct);
-    (void)FTM_DRV_InitPwm(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_PwmConfig);
+  /* [STEP 5] íƒ€ì´ë¨¸(PWM/LPIT) ë° í†µì‹  ì´ˆê¸°í™” */
+  (void)FTM_DRV_Init(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_InitConfig,
+                     &ftmStateStruct);
+  (void)FTM_DRV_InitPwm(INST_FLEXTIMER_PWM1, &flexTimer_pwm1_PwmConfig);
 
-    (void)LPIT_DRV_Init(INST_LPIT1, &lpit1_InitConfig);
-    (void)LPIT_DRV_InitChannel(INST_LPIT1, 0, &lpit1_ChnConfig0);
-    LPIT_DRV_StartTimerChannels(INST_LPIT1, (1U << 0U)); /* 10ms Å¸ÀÌ¸Ó ½ÃÀÛ */
+  (void)LPIT_DRV_Init(INST_LPIT1, &lpit1_InitConfig);
+  (void)LPIT_DRV_InitChannel(INST_LPIT1, 0, &lpit1_ChnConfig0);
+  LPIT_DRV_StartTimerChannels(INST_LPIT1, (1U << 0U)); /* 10ms íƒ€ì´ë¨¸ ì‹œì‘ */
 
-    /* [STEP 6] Åë½Å ¹× ±Û·Î¹ú ÀÎÅÍ·´Æ® È°¼ºÈ­ */
-    (void)LPUART_DRV_Init(INST_LPUART1, &lpuart1_State, &lpuart1_InitConfig0);
-    (void)INT_SYS_InstallHandler(LPUART1_RxTx_IRQn, FMSTR_Isr, (isr_t*)0);
-    INT_SYS_EnableIRQ(LPUART1_RxTx_IRQn);
+  /* [STEP 6] í†µì‹  ë° ê¸€ë¡œë²Œ ì¸í„°ëŸ½íŠ¸ í™œì„±í™” */
+  (void)LPUART_DRV_Init(INST_LPUART1, &lpuart1_State, &lpuart1_InitConfig0);
+  (void)INT_SYS_InstallHandler(LPUART1_RxTx_IRQn, FMSTR_Isr, (isr_t *)0);
+  INT_SYS_EnableIRQ(LPUART1_RxTx_IRQn);
 
-    FMSTR_Init();
-    INT_SYS_EnableIRQGlobal(); /* Àü¿ª ÀÎÅÍ·´Æ® Çã¿ë: ÀÌÁ¦ºÎÅÍ ISR ÀÛµ¿ ½ÃÀÛ */
+  FMSTR_Init();
+  INT_SYS_EnableIRQGlobal(); /* ì „ì—­ ì¸í„°ëŸ½íŠ¸ í—ˆìš©: ì´ì œë¶€í„° ISR ì‘ë™ ì‹œì‘ */
 
-    /* [STEP 7] ¹é±×¶ó¿îµå ¹«ÇÑ ·çÇÁ */
-    for(;;)
-    {
-        FMSTR_Poll();
-        loop_cnt++;
+  /* [STEP 7] ë°±ê·¸ë¼ìš´ë“œ ë¬´í•œ ë£¨í”„ */
+  for (;;) {
+    FMSTR_Poll();
+    loop_cnt++;
 
-        if(exit_code != 0)
-        {
-            break;
-        }
+    if (exit_code != 0) {
+      break;
     }
+  }
 
-  /*** Don't write any code pass this line, or it will be deleted during code generation. ***/
-  /*** RTOS startup code. Macro PEX_RTOS_START is defined by the RTOS component. DON'T MODIFY THIS CODE!!! ***/
-  #ifdef PEX_RTOS_START
-    PEX_RTOS_START();                  /* Startup of the selected RTOS. Macro is defined by the RTOS component. */
-  #endif
+/*** Don't write any code pass this line, or it will be deleted during code
+ * generation. ***/
+/*** RTOS startup code. Macro PEX_RTOS_START is defined by the RTOS component.
+ * DON'T MODIFY THIS CODE!!! ***/
+#ifdef PEX_RTOS_START
+  PEX_RTOS_START(); /* Startup of the selected RTOS. Macro is defined by the
+                       RTOS component. */
+#endif
   /*** End of RTOS startup code.  ***/
   /*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/
-  for(;;) {
-    if(exit_code != 0) {
+  for (;;) {
+    if (exit_code != 0) {
       break;
     }
   }

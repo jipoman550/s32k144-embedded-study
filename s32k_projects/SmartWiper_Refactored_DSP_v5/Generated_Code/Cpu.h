@@ -7,7 +7,7 @@
 **     Version     : Component 01.197, Driver 01.00, CPU db: 3.00.000
 **     Datasheet   : S32K14XRM Rev. 2, 02/2017
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2026-03-16, 23:08, # CodeGen: 0
+**     Date/Time   : 2026-03-29, 23:05, # CodeGen: 6
 **     Abstract    :
 **
 **     Settings    :
@@ -66,6 +66,7 @@
 #include "lpuart_driver.h"
 #include "lpit_driver.h"
 #include "wdog_driver.h"
+#include "flexcan_driver.h"
 #include "system_S32K144.h"
 
 /* Including needed modules to compile this module/procedure */
@@ -77,6 +78,7 @@
 #include "dmaController1.h"
 #include "lpit1.h"
 #include "watchdog1.h"
+#include "canCom1.h"
 
 #ifdef __cplusplus
 extern "C" {

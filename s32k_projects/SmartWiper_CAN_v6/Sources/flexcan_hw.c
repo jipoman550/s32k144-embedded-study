@@ -7,6 +7,13 @@ flexcan_msgbuff_t rx_msg;
 volatile uint32_t can_rx_count = 0U;
 volatile uint8_t last_rx_data[4] = {0U, 0U, 0U, 0U};
 
+/* [Observability] 실제 변수 할당 및 초기화 */
+volatile uint32_t can_tx_err_cnt = 0U;
+volatile uint32_t can_rx_err_cnt = 0U;
+volatile uint32_t can_ack_err_cnt = 0U;
+volatile uint32_t can_last_err_code = 0U;
+volatile bool is_can_failsafe = false;
+
 void FlexCAN0_Init_SDK(void)
 {
     /* SDK 초기화 (PCC, MCR, Timing 설정 자동 처리) */
@@ -21,12 +28,41 @@ void FlexCAN0_Init_SDK(void)
     };
 
     /* 1번 메시지 버퍼(MB)를 수신용으로 설정 */
-    // 42과정의 open() 후 대기하는 것과 같습니다.
-    FLEXCAN_DRV_ConfigRxMb(INST_CANCOM1, 1U, &rx_info, 0x100);
+    FLEXCAN_DRV_ConfigRxMb(INST_CANCOM1, 1U, &rx_info, CAN_WIPER_RX_ID);
 
     /* 비동기 수신 시작 */
     // "1번 MB에 ID 0x100인 데이터가 오면 rx_msg 변수에 써라"는 명령입니다.
     FLEXCAN_DRV_Receive(INST_CANCOM1, 1U, &rx_msg);
+}
+
+void Check_CAN_Status(void)
+{
+    uint32_t esr1_val = CAN0->ESR1; // ESR1 레지스터 직접 읽기
+    can_last_err_code = esr1_val;  // 전체 레지스터 값 보존
+
+    /* 1. ACK 에러 체크 (전송 실패의 주원인) */
+    if (esr1_val & CAN_ESR1_ACKERR_MASK)
+    {
+        can_ack_err_cnt++;
+        /* ACK 에러 발생 시 플래그 클리어 (Write 1 to clear) */
+        CAN0->ESR1 |= CAN_ESR1_ACKERR_MASK;
+    }
+
+    /* 2. 전송/수신 에러 카운터 경고 체크 (TXWRN, RXWRN) */
+    if (esr1_val & CAN_ESR1_TXWRN_MASK)
+	{
+		can_tx_err_cnt++;
+	}
+    if (esr1_val & CAN_ESR1_RXWRN_MASK)
+	{
+		can_rx_err_cnt++;
+	}
+
+    /* 3. Failsafe 발동 로직 (예: ACK 에러가 연속 10번 이상 발생 시) */
+    if (can_ack_err_cnt > 10U)
+    {
+        is_can_failsafe = true;
+    }
 }
 
 void FlexCAN0_Send_Wiper_Data(uint16_t adc_val, uint8_t mode, uint8_t step)
@@ -45,6 +81,6 @@ void FlexCAN0_Send_Wiper_Data(uint16_t adc_val, uint8_t mode, uint8_t step)
     canData[2] = mode;
     canData[3] = step;
 
-    /* 0번 메시지 버퍼(MB)를 통해 ID 0x100으로 전송 */
-    FLEXCAN_DRV_Send(INST_CANCOM1, 0U, &dataInfo, 0x100, canData);
+    FLEXCAN_DRV_Send(INST_CANCOM1, 0U, &dataInfo, CAN_WIPER_TX_ID, canData);
 }
+

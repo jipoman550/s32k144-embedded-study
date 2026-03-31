@@ -10,28 +10,42 @@ NXP S32K144EVB 보드를 활용한 임베디드 시스템 학습 기록입니다
 | [00](./00_gpio_output_led) | `00_gpio_output_led` | GPIO Output | GPIO, IDE Setup, Debugging | 2025.12.08 |
 | [01](./01_freemaster_s32k144) | `01_freemaster_s32k144` | ADC & FreeMASTER | ADC(SAR), Register Masking, Oscilloscope | 2025.12.15 |
 | [02](./02_RGB_Color_Mixer) | `02_RGB_Color_Mixer` | RGB Mixer | Interrupt, PWM, Color Mixing | 2025.12.20 |
+| [03](./03_smart_wiper) | `03_smart_wiper` | Basic Wiper Control | ADC, PWM, Polling | 2026.01.10 |
+| [04](./04_smart_wiper_dma) | `04_smart_wiper_dma` | DMA Integration | eDMA, Memory-to-Memory | 2026.01.25 |
+| [05](./05_smart_wiper_interrupt) | `05_smart_wiper_interrupt` | Timer & Interrupt | LPIT, ISR | 2026.02.10 |
+| [06](./06_smart_wiper_refactored_dsp)| `06_smart_wiper_refactored_dsp`| Code Refactoring | MA Filter, Control Logic | 2026.02.25 |
+| [07](./07_smart_wiper_CAN_v6) | `07_smart_wiper_CAN_v6` | CAN Loopback | CAN Tx/Rx, MISRA-C, Failsafe | 2026.03.15 |
+| [08](./08_smart_wiper_CAN_2_v7)| `08_smart_wiper_CAN_2_v7`| Dual Node CAN | 2-Board CAN Communication | 2026.03.30 |
 
 ---
 
 ## 📂 Project Details
 
 ### 🟢 00. GPIO Output LED
-* **목표:** 보드 내장 LED(Red/Green/Blue) 제어를 통한 GPIO Output 동작 이해.
-* **학습 내용:**
-    * S32DS IDE 환경 구축 및 디버거(OpenSDA) 설정.
-    * `PINS_DRV_WritePin` 등 SDK 함수 활용법 기초.
+* **목표:** 보드 내장 LED 제어를 통한 S32DS IDE 환경 구축 및 GPIO Output 기초 동작 이해.
 
 ### 📈 01. FreeMASTER ADC Oscilloscope (Deep Dive)
-* **목표:** 가변 저항(Potentiometer)의 전압 변화를 ADC로 읽어들이고, **FreeMASTER**를 통해 실시간 그래프(오실로스코프)로 시각화.
+* **목표:** 가변 저항 전압 변화의 ADC 실시간 수집 및 FreeMASTER 오실로스코프 시각화.
 
 ### 🎨 02. RGB Color Mixer (ADC + PWM + Interrupt)
+* **목표:** 하이브리드 제어(ADC Polling + FreeMASTER ISR)를 활용한 실시간 RGB 색상 혼합(PWM) 파형 분석 및 검증.
 
-* **목표:** 가변 저항의 아날로그 입력을 3개의 구간으로 수치화하고, 각 구간에 매칭되는 RGB LED의 밝기를 PWM으로 제어하여 실시간 색상 혼합(Color Mixing) 구현.
-* **학습 내용:**
-    * **하이브리드 제어 구조:** ADC 데이터 획득에는 **Polling** 방식을, FreeMASTER 통신 모니터링에는 **Interrupt** 방식을 적용하여 시스템 제어와 통신의 효율성 최적화.
-    * **PWM Duty Cycle 제어:**  범위의 ADC 디지털 값을  범위의 PWM 듀티 사이클로 정밀 스케일링(Scaling)하는 수식 설계 및 구현.
-    * **인터럽트 핸들러 수동 등록:** `INT_SYS_InstallHandler` 함수를 통해 LPUART1 하드웨어 인터럽트와 FreeMASTER 엔진(`FMSTR_Isr`)을 직접 연결하는 로우레벨(Low-level) 인터럽트 설정 실습.
-    * **데이터 시각화:** **FreeMASTER**를 활용하여 가변 저항 회전에 따른 RGB 각 채널의 Duty Cycle 변화를 실시간 파형(Scope)으로 분석 및 검증.
+### 🚗 03. Smart Wiper (Basic)
+* **목표:** 가변저항 ADC 값을 Servo Motor의 PWM Duty로 변환하는 기초 와이퍼 제어 구현.
 
+### ⚡ 04. Smart Wiper with DMA
+* **목표:** CPU 개입 없이 ADC 데이터를 메모리로 직접 이동시키는 eDMA 기술 적용.
+
+### ⏱️ 05. Smart Wiper with Interrupt
+* **목표:** LPIT 타이머를 활용하여 10ms 주기의 정밀 반복 제어(ISR) 시스템 구축.
+
+### 🛠️ 06. Smart Wiper Refactoring & DSP
+* **목표:** 이동 평균 필터(Moving Average) 적용 및 하이브리드 제어 로직 리팩토링으로 신호 안정성 확보.
+
+### ⚙️ 07. Smart Wiper CAN Loopback (v6)
+* **목표:** 1대 보드 내 FlexCAN 루프백 통신, Failsafe 로직 강화, ISR 다이어트 및 MISRA-C 검증 도입.
+
+### 🔗 08. Smart Wiper Dual Node CAN (v7)
+* **목표:** 2대의 S32K144 보드를 물리적 CAN 버스로 연결하여 상호 데이터 송수신 네트워크 구축.
 
 ---

@@ -250,6 +250,43 @@ Module "watchdog1" (component wdog)
                 should set this field to 0x01U in order to indicate that the WDOG is functioning normally.
    - watchdog1_WDOG_DRV_GetTestMode -This function verifies the test mode of the WDOG.
 
+Module "canCom1"   (component flexcan)
+   - canCom1_FLEXCAN_DRV_SetBitrate -Sets the FlexCAN bit rate.
+   - canCom1_FLEXCAN_DRV_GetBitrate -Gets the FlexCAN bit rate.
+   - canCom1_FLEXCAN_DRV_SetRxMaskType -Sets the RX masking type.
+   - canCom1_FLEXCAN_DRV_SetRxFifoGlobalMask -Sets the FlexCAN RX FIFO global standard or extended mask.
+   - canCom1_FLEXCAN_DRV_SetRxMbGlobalMask -Sets the FlexCAN RX MB global standard or extended mask.
+   - canCom1_FLEXCAN_DRV_SetRxIndividualMask -Sets the FlexCAN RX individual standard or extended mask.
+   - canCom1_FLEXCAN_DRV_Init -Initializes the FlexCAN peripheral.
+   - canCom1_FLEXCAN_DRV_Deinit -Shuts down a FlexCAN instance.
+   - canCom1_FLEXCAN_DRV_ConfigTxMb -FlexCAN transmit message buffer field configuration.
+   - canCom1_FLEXCAN_DRV_ConfigRemoteResponseMb -Configures a transmit message buffer for remote frame response.
+   - canCom1_FLEXCAN_DRV_SendBlocking -Sends a CAN frame using the specified message buffer, in a blocking manner.
+   - canCom1_FLEXCAN_DRV_Send -Sends a CAN frame using the specified message buffer.
+   - canCom1_FLEXCAN_DRV_AbortTransfer -Ends a non-blocking FlexCAN transfer early.
+   - canCom1_FLEXCAN_DRV_ConfigRxMb -FlexCAN receive message buffer field configuration.
+   - canCom1_FLEXCAN_DRV_ConfigRxFifo -FlexCAN RX FIFO field configuration.
+   - canCom1_FLEXCAN_DRV_ReceiveBlocking -Receives a CAN frame using the specified message buffer, in a blocking manner.
+   - canCom1_FLEXCAN_DRV_Receive -Receives a CAN frame using the specified message buffer.
+   - canCom1_FLEXCAN_DRV_RxFifoBlocking -Receives a CAN frame using the message FIFO, in a blocking manner.
+   - canCom1_FLEXCAN_DRV_RxFifo -Receives a CAN frame using the message FIFO.
+   - canCom1_FLEXCAN_DRV_GetTransferStatus -Returns whether the previous FLEXCAN transfer has finished.
+   - canCom1_FLEXCAN_DRV_InstallErrorCallback -Installs a callback function for the Error IRQ handler.
+   - canCom1_FLEXCAN_DRV_InstallEventCallback -Installs a callback function for the IRQ handler.
+   - canCom1_FLEXCAN_DRV_GetDefaultConfig -Initializes the FlexCAN peripheral.
+   - canCom1_FLEXCAN_DRV_SetRxMb14Mask -Sets the FlexCAN Rx MB 14 mask (standard or extended).
+   - canCom1_FLEXCAN_DRV_SetRxMb15Mask -Sets the FlexCAN Rx MB 15 mask (standard or extended).
+   - canCom1_FLEXCAN_DRV_GetErrorStatus -Reports the error status for CAN instance
+   - canCom1_FLEXCAN_DRV_ConfigPN -Configures Pretended Networking settings.
+   - canCom1_FLEXCAN_DRV_GetWMB -Extracts one of the frames which triggered the wake up event.
+   - canCom1_FLEXCAN_DRV_SetBitrateCbt -Sets the FlexCAN bit rate for FD BRS.
+   - canCom1_FLEXCAN_DRV_GetBitrateFD -Gets the FlexCAN bit rate.
+   - canCom1_FLEXCAN_DRV_SetTDCOffset -Enables/Disables the Transceiver Delay Compensation feature and sets the Transceiver 
+                Delay Compensation Offset.
+   - canCom1_FLEXCAN_DRV_GetTDCValue -Gets the value of the Transceiver Delay Compensation.
+   - canCom1_FLEXCAN_DRV_GetTDCFail -Gets the value of the TDC Fail flag.
+   - canCom1_FLEXCAN_DRV_ClearTDCFail -Clears the TDC Fail flag.
+
 Module "Cpu"       (component S32K144_100)
    - Cpu_SystemInit -This function disables the watchdog, enables FPU and the power mode protection. SystemInit is called from 
                 startup_device file.

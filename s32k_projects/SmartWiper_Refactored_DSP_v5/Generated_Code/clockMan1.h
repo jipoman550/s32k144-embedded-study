@@ -7,7 +7,7 @@
 **     Version     : Component SDK_S32K1xx_15, Driver 01.00, CPU db: 3.00.000
 **     Repository  : SDK_S32K1xx_15
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2026-03-16, 23:08, # CodeGen: 0
+**     Date/Time   : 2026-03-29, 23:05, # CodeGen: 6
 **     Contents    :
 **         CLOCK_DRV_Init                 - status_t CLOCK_DRV_Init(clock_manager_user_config_t const * config);
 **         CLOCK_DRV_GetFreq              - status_t CLOCK_DRV_GetFreq(clock_names_t clockName, uint32_t * frequency);
@@ -83,7 +83,7 @@ extern clock_manager_user_config_t const *g_clockManConfigsArr[];
 extern peripheral_clock_config_t peripheralClockConfig0[];
 
 /*! @brief Count of peripheral clock user configurations */
-#define NUM_OF_PERIPHERAL_CLOCKS_0 16U
+#define NUM_OF_PERIPHERAL_CLOCKS_0 19U
 
 
 /*! @brief Count of user Callbacks */

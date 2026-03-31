@@ -3,7 +3,7 @@
   <Header>
     <Name>SmartWiper_CAN_v6</Name>
     <SavedBy>tjdtl</SavedBy>
-    <ModificationStamp>18</ModificationStamp>
+    <ModificationStamp>19</ModificationStamp>
     <Date>2026-01-26</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.12.2.RT7_b1743-0713</PEversion>
@@ -14958,7 +14958,7 @@
         <ItemSymbol>ProjectComponentsCountChanged</ItemSymbol>
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
-        <Value>1</Value>
+        <Value>2</Value>
       </ItemState>
       <ItemState>
         <ItemSymbol>ModuleName_ADC</ItemSymbol>
@@ -17538,8 +17538,8 @@
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
         <TypeSpecNameState>type_edma_channel_request_s32k144</TypeSpecNameState>
-        <Index>47</Index>
-        <EnumSymbVal>EDMA_REQ_FLEXCAN0</EnumSymbVal>
+        <Index>35</Index>
+        <EnumSymbVal>EDMA_REQ_ADC0</EnumSymbVal>
       </ItemState>
       <ItemState>
         <ItemSymbol>CallbackName0</ItemSymbol>
