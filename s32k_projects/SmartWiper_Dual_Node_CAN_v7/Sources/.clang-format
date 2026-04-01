@@ -1,0 +1,14 @@
+# .clang-format 파일 내용
+BasedOnStyle: LLVM
+# 중괄호를 다음 줄로 (Allman 스타일)
+BreakBeforeBraces: Allman
+# 들여쓰기 너비를 4로 설정
+IndentWidth: 4
+# 탭의 너비를 4로 설정
+TabWidth: 4
+# 스페이스 대신 실제 탭(Tab) 문자 사용
+UseTab: Always
+# 한 줄짜리 if문도 중괄호 사용 권장 및 줄바꿈
+AllowShortIfStatementsOnASingleLine: false
+# else를 다음 줄에 배치
+ColumnLimit: 120
