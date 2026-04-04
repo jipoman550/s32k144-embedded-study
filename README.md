@@ -1,92 +1,73 @@
-# 📘 S32K144 Embedded Systems Study: Smart Wiper Project
+# 📘 S32K144 Embedded Systems: Smart Wiper Evolution
+> **From 42 Gyeongsan (Software Fundamentals) to Automotive System Architecture.**
 
-This repository documents my journey from Linux-based C programming (42 Gyeongsan) to professional Automotive Embedded Software Engineering. It covers everything from basic MCU register control to building a high-level **Smart Wiper System** using the NXP S32K144EVB.
-
----
-
-## 📂 Project Structure
-
-```text
-.
-├── assets/                     # Datasheets, Schematics, and Reference Manuals (S32K-RM)
-├── board_notes/                # Step-by-step study logs and hardware theory
-│   ├── 00_gpio_output_led/
-│   ├── 01_freemaster_s32k144/
-│   ├── 02_RGB_color_mixer/
-│   └── 03_smart_wiper/         # Core Project: Current Development
-├── docs/                       # Environmental setup and prerequisite knowledge
-└── s32k_projects/              # S32 Design Studio (S32DS) Project Files
-    ├── LED_Blink_Red/          # Basic GPIO output
-    ├── freemaster_s32k144/     # FreeMASTER integration for debugging
-    ├── RGB_color_mixer/        # PWM control via FTM (FlexTimer)
-    └── smart_wiper/            # MAIN: ADC + PWM + Non-blocking logic
-
-```
+This repository documents the development of a Smart Wiper System using the NXP S32K144EVB. It captures the complete engineering journey—evolving from basic control logic to hardware acceleration (DMA), digital signal processing (DSP), and eventually to a **standard automotive network (CAN)** and **AUTOSAR architecture**.
 
 ---
 
-## 🏎️ Main Project: Smart Wiper System
+## 🏎️ Project Roadmap: The Evolution of Architecture
 
-The goal of this project is to simulate a real-world automotive wiper system that adjusts its speed based on rain intensity (simulated via ADC/Potentiometer).
+This is not just about adding features; it is an architectural leap to ensure **Real-time processing** and absolute **Reliability**, crucial for automotive electronic control units (ECUs).
 
-### Key Features
+### [Phase 1] Foundation (v1 ~ v4)
+- **Core**: Finite State Machine (FSM) based wiper mode control (STOP, INT, LOW, HIGH).
+- **Hard Real-time**: Strict 10ms periodic control guaranteed by LPIT timer interrupts.
+- **Efficiency**: "Zero-overhead sensing" achieved by mitigating CPU load through eDMA for ADC data acquisition.
 
-* **Non-blocking Logic**: Implemented using a **State Machine** (STOP, INT, LOW, HIGH) instead of `delay()` functions, allowing the MCU to handle multiple tasks concurrently.
-* **Hardware Integration**:
-* **ADC**: Reads rain intensity from the potentiometer.
-* **FTM (PWM)**: Controls the servo motor (wiper) speed and position.
-* **LPUART**: Communicates system status to the PC.
+### [Phase 2] Reliability & DSP (v5)
+- **Signal Integrity**: Implementation of a **Moving Average Filter (DSP)** to remove sensor noise and ensure control stability.
+- **Failsafe Design**: Built-in diagnostic logic for hardware faults (open/short circuits) and sudden abnormal signal variations (Delta Check).
+- **Layered Refactoring**: Increased code reusability by strictly separating top-level application logic from the Hardware Abstraction Layer (HAL).
 
+### [Phase 3] Distributed System & Optimization (v6 ~ v7)
+- **Architectural Shift (v6)**: Introduction of the **Foreground-Background Scheduling**. High-overhead control logic was migrated from the ISR to the Main Loop to maximize system responsiveness.
+  - *Why?* To minimize interrupt latency in preparation for asynchronous CAN communication and large-scale data processing in the future.
+- **Network Implementation (v7)**: Construction of a Master-Slave distributed control environment via a physical CAN bus.
+  - **Fail-safe Over Network**: Slave nodes are programmed to revert to a Safe-state (Wiper Home Position) upon detection of communication loss or CAN bus off events.
 
-* **Real-time Monitoring**: Integrated with **FreeMASTER** to visualize ADC values and state transitions in real-time.
-
----
-
-## 📈 Engineering Roadmap (Industry-Focused)
-
-Designed to meet the technical requirements of Tier-1 automotive suppliers like **Valeo**.
-
-### Phase 1: Feature Implementation (Current)
-
-* Functional Smart Wiper using NXP S32 SDK.
-* Non-blocking state management.
-
-### Phase 2: Hardware Deep-Dive (Bare-metal)
-
-* Re-implementing SDK drivers by directly manipulating **Registers** (PCC, PORT, ADC, FTM).
-* Optimization using **Interrupts** and **DMA (Direct Memory Access)** to reduce CPU load.
-
-### Phase 3: Automotive Communication
-
-* Implementing **LIN (Local Interconnect Network)** for wiper/door control simulation.
-* Implementing **CAN (Controller Area Network)** for high-speed vehicle data exchange.
-
-### Phase 4: Embedded OS (RTOS)
-
-* Porting **FreeRTOS** to manage multiple automotive tasks (Control, Communication, Diagnosis).
-* Understanding AUTOSAR-like layered architecture (MCAL-BSW-RTE-ASW).
+### [Phase 4] Standard & Future (Current) 🚀
+- **Transition to AUTOSAR**: Platform standardization using NXP RTD and **EB tresos** ecosystem.
+- **High-Performance Control**: Implementation of a robust PID Controller for precise closed-loop DC Motor + Encoder actuation.
+- **Physical AI Integration**: Building an intelligent decision-making system by integrating Embedded Linux (Raspberry Pi Vision) with the S32K144 VCU.
 
 ---
 
-## 🛠 Tech Stack
+## 🔌 Technical Deep Dive
 
-* **Hardware**: NXP S32K144EVB-Q100 (Cortex-M4F)
-* **IDE**: S32 Design Studio (S32DS) for ARM v2.2
-* **Debugger**: FreeMASTER, OpenSDA
-* **Language**: Embedded C
+### 1. Foreground-Background Scheduling (v6 Innovation)
+We detached the heavy computational logic from the ISRs, moving it to the `while(1)` Main Loop. Now, the 10ms ISR strictly serves to generate execution **Flags**. This architectural design guarantees that the system will never stall and can gracefully handle critical high-priority asynchronous events (e.g., CAN Rx/Tx) without jitter.
+
+> 📊 **Slack Time Comparison Graph (Pre- vs Post-Architecture Shift)**
+> 
+> *<img src="assets/images/loop_count_comparison.png" alt="v6 Loop Count Slack Time Comparison" width="600"/>*
+> 
+> *(This graph illustrates the dramatic increase in idle slack time achieved by relieving the CPU from heavily packed ISRs, leaving ample bandwidth for future AUTOSAR BSW tasks.)*
+
+### 2. DMA & DSP Pipeline
+Upon completion of ADC conversion, the eDMA instantly transfers the data into memory. The CPU then reads and processes only the filtered values during its schedule. By utilizing bitwise shift operations (`adcSum >> 3U`) over standard division, mathematical overhead was deeply optimized for the Cortex-M4F environment.
+
+### 3. Failsafe Strategy
+For mission-critical automotive software, 'Safety' is the highest priority. If the filtered sensor variations exceed physical limits (`MAX_DELTA`) or electrical anomalies are flagged, the system inherently triggers a Safe-state strategy, locking into `MODE_OFF` and returning the wiper to its home position immediately.
 
 ---
 
-## 📝 Study Philosophy (From 42 Gyeongsan to Embedded)
+## 🛠 Tech Stack & Tools
 
-* **Understanding MMIO**: Connecting C pointers to physical memory addresses (Registers).
-* **Manual Reference**: Prioritizing the **S32K1xx Reference Manual** over generic tutorials.
-* **Data-Driven**: Every system state must be visible and measurable via FreeMASTER.
+- **MCU**: NXP S32K144 (ARM Cortex-M4F)
+- **IDE/Tools**: S32 Design Studio v3.5 (RTD-based), **EB tresos Studio**, FreeMASTER
+- **Protocol**: CAN 2.0B, LPUART, SPI
+- **Architecture**: Foreground-Background, AUTOSAR Classic (In Progress)
+- **Language**: Embedded C (MISRA-C compliance oriented)
+
+---
+
+## 📝 Engineering Philosophy
+- **Manual First**: Direct register manipulation (MMIO) powered by the **S32K1xx Reference Manual** and **Datasheets**, rather than relying solely on generic tutorials or black-box SDKs.
+- **Data Driven**: Tuning and verification are performed empirically by visualizing live memory variables via real-time **FreeMASTER DAQ graphs**.
+- **System Thinking**: Prioritizing the overall system data flow, task priority, and real-time execution constraints over the isolated operation of individual peripherals.
 
 ---
 
 ## 📎 References
-
-* [S32K1xx Series Reference Manual](https://www.google.com/search?q=assets/S32K-RM.pdf)
-* [S32K144EVB Schematic](https://www.google.com/search?q=assets/NXP_S32K144EVB_SCH.pdf)
-* [AN5413: S32K1xx Series Cookbook](https://www.google.com/search?q=assets/AN5413.pdf)
+- [S32K1xx Series Reference Manual](https://www.nxp.com/webapp/Download?colCode=S32K1XXRM)
+- [AN5413: S32K144 Series Cookbook](https://www.nxp.com/webapp/Download?colCode=AN5413)
