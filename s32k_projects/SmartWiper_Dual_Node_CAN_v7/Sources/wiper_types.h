@@ -21,7 +21,7 @@
 #define NODE_A          0U
 #define NODE_B          1U
 
-#define CURRENT_NODE    NODE_A   /* <<< CHANGE HERE TO SWITCH NODE */
+#define CURRENT_NODE    NODE_B   /* <<< CHANGE HERE TO SWITCH NODE */
 
 /* ================================================================
  * Wiper Mode / Step Enums (shared by both nodes)

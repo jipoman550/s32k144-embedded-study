@@ -3,7 +3,7 @@
   <Header>
     <Name>SmartWiper_Dual_Node_CAN_v7</Name>
     <SavedBy>tjdtl</SavedBy>
-    <ModificationStamp>22</ModificationStamp>
+    <ModificationStamp>23</ModificationStamp>
     <Date>2026-01-26</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.12.2.RT7_b1743-0713</PEversion>
@@ -14958,7 +14958,7 @@
         <ItemSymbol>ProjectComponentsCountChanged</ItemSymbol>
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
-        <Value>1</Value>
+        <Value>0</Value>
       </ItemState>
       <ItemState>
         <ItemSymbol>ModuleName_ADC</ItemSymbol>

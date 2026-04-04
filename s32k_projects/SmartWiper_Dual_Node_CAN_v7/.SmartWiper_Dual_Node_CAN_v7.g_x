@@ -110,5 +110,5 @@
       <File Name="SDK/platform/devices/startup.c" FileDate="2026-03-31, 15:09:34" FileAge="1774937374022" FileType="1048576" CompNumb="1" />
     </GeneratedByPE>
   </GeneratedFilesList>
-  <CodeGenReference>7</CodeGenReference>
+  <CodeGenReference>9</CodeGenReference>
 </CodeGenerationInfo>

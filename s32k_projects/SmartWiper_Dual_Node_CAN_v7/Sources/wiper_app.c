@@ -235,6 +235,7 @@ void Wiper_Comm_Task(void)
 #if (CURRENT_NODE == NODE_B)
 
 /* --- Node B state --- */
+volatile uint32_t stepCounter_monitor = 0U; // <--- 추가
 volatile NodeB_Status_t nodeB_status = STATUS_NORMAL;
 volatile WiperStep_t currentStep_monitor = WIPER_IDLE;
 
@@ -361,6 +362,7 @@ void Wiper_Update_Hardware(void)
 		currentStep = WIPER_IDLE;
 		stepCounter = 0U;
 		currentStep_monitor = currentStep;
+		stepCounter_monitor = stepCounter; //<---
 		return;
 	}
 
@@ -432,6 +434,7 @@ void Wiper_Update_Hardware(void)
 	}
 
 	currentStep_monitor = currentStep;
+	stepCounter_monitor = stepCounter; // <--- 여기서 값을 복사
 }
 
 /* --- Node B Comm: TX status (B2A) --- */

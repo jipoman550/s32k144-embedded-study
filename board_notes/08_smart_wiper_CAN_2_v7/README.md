@@ -62,7 +62,33 @@
 
 ---
 
-## 🖼️ 5. 시스템 아키텍처 다이어그램 (Sequence Flow)
+## 🖼️ 5. 시스템 아키텍처 다이어그램 (System Diagrams)
+
+### 5.1 전체 물리 아키텍처 (Overall Architecture)
+Node A(마스터), Node B(슬레이브), 그리고 PC(FreeMASTER) 연결까지 포함한 전체 물리적 인터페이스 구조입니다.
+
+```mermaid
+graph LR
+    PC["🖥️ PC (FreeMASTER)"] <==>|UART/USB<br/>데이터 로깅 & 상태 모니터링| NodeA
+
+    subgraph "Node A (Master / Control)"
+        direction TB
+        A_ADC["🌡️ 가변저항 (ADC)"] -->|PTA0| NodeA["⚙️ MCU (S32K144)"]
+        A_SW2["🔘 SW2 (자동/수동)"] -->|PTC12| NodeA
+        A_SW3["🔘 SW3 (단발 동작)"] -->|PTC13| NodeA
+    end
+
+    NodeA <==>|"통신 선로 (CAN Bus)<br/>120Ω 종단<br/>ID: 0x100 / 0x200"| NodeB
+
+    subgraph "Node B (Slave / Actuator)"
+        direction TB
+        NodeB["⚙️ MCU (S32K144)"] -->|PTC0 (PWM)| B_Motor["🔄 서보모터 (Wiper)"]
+        B_SW2["⚠️ SW2 (Stuck 발생)"] -->|PTC12| NodeB
+        B_SW3["✅ SW3 (에러 복구)"] -->|PTC13| NodeB
+    end
+```
+
+### 5.2 제어 시퀀스 흐름도 (Sequence Flow)
 
 ```mermaid
 sequenceDiagram

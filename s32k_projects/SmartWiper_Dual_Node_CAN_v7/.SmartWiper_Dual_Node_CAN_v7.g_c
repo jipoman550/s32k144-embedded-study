@@ -615,7 +615,7 @@
     </GenFiles>
     <SignalListFile />
     <DestinationCompiler>GNUC</DestinationCompiler>
-    <ProjectModificationStamp>22</ProjectModificationStamp>
+    <ProjectModificationStamp>23</ProjectModificationStamp>
   </Options>
   <CpuID_1>
     <Generated>true</Generated>

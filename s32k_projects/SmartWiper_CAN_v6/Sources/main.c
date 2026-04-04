@@ -102,7 +102,7 @@ static uint8_t bufferIdx = 0U; /* 현재 저장 위치 */
 volatile uint16_t filteredAdc = 0U; /* 최종 필터링된 값 */
 
 /* 시스템 모니터링용 변수 */
-volatile uint32_t ms_ticks = 0U;
+volatile uint32_t ms_ticks = 0U; // 오버프로우 이슈
 volatile uint32_t loop_cnt = 0U;
 
 /* 통신(FreeMASTER) 제어용 변수 */
