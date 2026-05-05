@@ -5,7 +5,7 @@
 ---
 
 ## 🎯 1. 프로젝트 개요 (Project Overview)
-본 프로젝트는 단일 보드 내장 통신(Loopback, v6)의 한계를 극대화하여, **두 개의 S32K144 EVB 노드(Master/Slave) 간 물리적 CAN 네트워크를 통한 실시간 양방향 분산 제어 시스템**을 성공적으로 구축한 결과물입니다. 
+본 프로젝트는 단일 보드 내장 통신(Loopback, v6)의 한계를 극대화하여, **두 개의 S32K144 EVB 노드(Master/Slave) 간 물리적 CAN 네트워크를 통한 실시간 양방향 분산 제어 시스템**을 성공적으로 구축한 결과물입니다.
 산업용 소프트웨어 표준인 AUTOSAR 아키텍처의 철학을 반영하여 **APP / HAL / MCAL 3계층 분리(Layering) 아키텍처**를 적용하였으며, 이를 통해 높은 수준의 추상화(Abstraction)와 캡슐화(Encapsulation)를 달성하였습니다.
 
 ---
@@ -30,7 +30,7 @@
 
 이 프로젝트의 핵심 소프트웨어 공학적 성과는 **"하나의 소스 코드로 두 보드를 모두 제어하는 플랫폼 소프트웨어"**를 구축했다는 점입니다.
 
-* **Single Source, Multi-Variant**: 소스 코드 내 `#define CURRENT_NODE` 매크로(전처리기) 하나만 변경하면 Node A 펌웨어와 Node B 펌웨어가 선택적으로 빌드됩니다. 
+* **Single Source, Multi-Variant**: 소스 코드 내 `#define CURRENT_NODE` 매크로(전처리기) 하나만 변경하면 Node A 펌웨어와 Node B 펌웨어가 선택적으로 빌드됩니다.
 * **Super-set Pinmux**: 두 보드가 사용하는 모든 하드웨어 핀(ADC, PWM, GPIO)을 하나의 `pin_mux.c`에 통합하여, 타겟 칩이 바뀌더라도 유지보수가 극도로 간결해집니다.
 
 ### 📊 3계층 아키텍처 역할 명세서
@@ -52,12 +52,12 @@
 
 ### 🛡️ Advanced Fail-safe (지능형 안전 로직)
 자동차 전장 시스템의 최우선 과제인 '안전 기능'을 3중으로 구현하였습니다.
-1. **Communication Timeout (통신 두절 감지)**: 
+1. **Communication Timeout (통신 두절 감지)**:
    * 양측 노드 모두 `can_ack_err_cnt`와 `RX Timeout(500ms)`을 감시합니다.
    * 디버거 정지나 선로 단선으로 메시지가 끊기면 즉시 `is_can_failsafe = true`로 전환되어 모터를 가장 안전한 위치(0도)로 원복시킵니다.
-2. **Stuck Detection (기계적 부하 차단)**: 
+2. **Stuck Detection (기계적 부하 차단)**:
    * Node B에서 물리적 끼임(장애물) 버튼이 눌리면, 그 즉시 서보모터 PWM 출력을 정지(IDLE)시키고 Node A에게 `STATUS_STUCK`을 송신하여 시스템 전체를 `MODE_OFF` 로 잠급니다.
-3. **Sensor Fault Protection (센서 플로팅 방어)**: 
+3. **Sensor Fault Protection (센서 플로팅 방어)**:
    * Node A의 ADC 핀이 빠져 값이 치솟거나(플로팅), 비정상 델타값 스파이크가 발생하면 코어 로직이 이를 불량 센서로 간주하여 구동을 원천 차단합니다.
 
 ---
@@ -69,23 +69,22 @@ Node A(마스터), Node B(슬레이브), 그리고 PC(FreeMASTER) 연결까지 �
 
 ```mermaid
 graph LR
-    PC["🖥️ PC (FreeMASTER)"] <==>|UART/USB<br/>데이터 로깅 & 상태 모니터링| NodeA
-
     subgraph "Node A (Master / Control)"
         direction TB
-        A_ADC["🌡️ 가변저항 (ADC)"] -->|PTA0| NodeA["⚙️ MCU (S32K144)"]
-        A_SW2["🔘 SW2 (자동/수동)"] -->|PTC12| NodeA
-        A_SW3["🔘 SW3 (단발 동작)"] -->|PTC13| NodeA
+        A_ADC["🌡️ 가변저항 (ADC)"] -->|"PTA0"| NodeA["⚙️ MCU (S32K144)"]
+        A_SW2["🔘 SW2 (자동/수동)"] -->|"PTC12"| NodeA
+        A_SW3["🔘 SW3 (단발 동작)"] -->|"PTC13"| NodeA
     end
-
-    NodeA <==>|"통신 선로 (CAN Bus)<br/>120Ω 종단<br/>ID: 0x100 / 0x200"| NodeB
 
     subgraph "Node B (Slave / Actuator)"
         direction TB
-        NodeB["⚙️ MCU (S32K144)"] -->|PTC0 (PWM)| B_Motor["🔄 서보모터 (Wiper)"]
-        B_SW2["⚠️ SW2 (Stuck 발생)"] -->|PTC12| NodeB
-        B_SW3["✅ SW3 (에러 복구)"] -->|PTC13| NodeB
+        NodeB["⚙️ MCU (S32K144)"] -->|"PTC0 (PWM)"| B_Motor["🔄 서보모터 (Wiper)"]
+        B_SW2["⚠️ SW2 (Stuck 발생)"] -->|"PTC12"| NodeB
+        B_SW3["✅ SW3 (에러 복구)"] -->|"PTC13"| NodeB
     end
+
+    PC["🖥️ PC (FreeMASTER)"] <-->|"UART/USB<br/>데이터 로깅 & 상태 모니터링"| NodeA
+    NodeA <-->|"통신 선로 (CAN Bus)<br/>120Ω 종단<br/>ID: 0x100 / 0x200"| NodeB
 ```
 
 ### 5.2 제어 시퀀스 흐름도 (Sequence Flow)

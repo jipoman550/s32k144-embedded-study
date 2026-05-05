@@ -104,11 +104,11 @@
       <File Name="SDK/platform/devices/callbacks.h" FileDate="2026-03-31, 15:09:33" FileAge="1774937373983" FileType="1048576" CompNumb="1" />
       <File Name="SDK/platform/drivers/inc/adc_driver.h" FileDate="2026-03-31, 15:09:33" FileAge="1774937373536" FileType="1048576" CompNumb="5" />
       <File Name="Documentation/SmartWiper_Dual_Node_CAN_v7.txt" FileDate="2026-03-31, 15:09:34" FileAge="1774937374603" FileType="3072" />
-      <File Name="Generated_Code/lpit1.h" FileDate="2026-03-31, 15:09:34" FileAge="1774937374158" FileType="45637" CompNumb="13" />
       <File Name="SDK/platform/devices/startup.h" FileDate="2026-03-31, 15:09:34" FileAge="1774937374012" FileType="1048576" CompNumb="1" />
-      <File Name="Generated_Code/lpit1.c" FileDate="2026-03-31, 15:09:34" FileAge="1774937374149" FileType="45637" CompNumb="13" />
+      <File Name="Generated_Code/lpit1.h" FileDate="2026-03-31, 15:09:34" FileAge="1774937374158" FileType="45637" CompNumb="13" />
       <File Name="SDK/platform/devices/startup.c" FileDate="2026-03-31, 15:09:34" FileAge="1774937374022" FileType="1048576" CompNumb="1" />
+      <File Name="Generated_Code/lpit1.c" FileDate="2026-03-31, 15:09:34" FileAge="1774937374149" FileType="45637" CompNumb="13" />
     </GeneratedByPE>
   </GeneratedFilesList>
-  <CodeGenReference>9</CodeGenReference>
+  <CodeGenReference>10</CodeGenReference>
 </CodeGenerationInfo>
