@@ -1,7 +1,7 @@
 # 03. Smart Wiper System (ADC + PWM + State Machine)
 
-> 📂 **관련 문서 및 설계 사양서 경로**
-> * **프로젝트 설계사양서(PPTX)**: `board_notes/03_smart_wiper/설계사양서(스마트 와이퍼 프로젝트).pptx`
+> 📂 **설계 사양서**
+> [* **프로젝트 설계사양서(PPTX)**: `board_notes/03_smart_wiper/설계사양서(스마트 와이퍼 프로젝트).pptx`](https://docs.google.com/presentation/d/1ZYnYInHSKUaJvb6Nu8b6fTkJw7slTBsg455Bz-95eh8/edit?usp=sharing)
 
 ## 🎯 프로젝트 개요
 S32K144EVB 보드와 외부 하드웨어(서보모터, 가변저항)를 연동하여, 빗물의 양을 감지하고 이에 따라 와이퍼의 속도를 자동으로 조절하는 **지능형 와이퍼 제어 시스템**을 구현합니다.
