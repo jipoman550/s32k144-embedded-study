@@ -35,12 +35,27 @@
 
 ## 🔌 기술적 깊이 (Technical Deep Dive)
 
-### 1. 전경-배경 스케줄링 (Foreground-Background Scheduling)
-CAN 통신과 같은 고순위 비동기 이벤트에 유연하게 대응하기 위해, 무거운 제어 연산 로직을 인터럽트 서비스 루틴(ISR)에서 분리하여 `while(1)` 백그라운드 루프로 이관했습니다. 이제 10ms ISR은 단순히 실행 플래그(Flag)만을 생성합니다. 이 구조를 통해 시스템이 정체되는 현상을 막고 지터(Jitter) 없는 확정적(Deterministic) 동작을 보장합니다.
+### 1. 전경-배경 스케줄링 및 CPU 부하 분석 (v6)
+인터럽트 서비스 루틴(ISR) 내부의 무거운 제어 연산을 `while(1)` 백그라운드 루프로 이관하여 시스템 응답성을 극대화했습니다. 10ms ISR은 이제 최소한의 이벤트 시그널링(Flag)만 담당합니다. 이 구조적 개선을 통해 확보된 CPU의 여유 대역폭(Slack Time)은 10초간 메인 루프가 회전하는 횟수(`loop_cnt`)를 기준으로 정량적으로 검증했습니다.
 
-> 📊 **슬랙 타임(Slack Time) 분석 (ISR 최적화 효과)**
-> *<img src="board_notes/07_smart_wiper_CAN_v6/loop_cnt_with_ISR.png" alt="슬랙 타임 비교 그래프" width="600"/>*
-> *(인터럽트 내부 부하를 덜어냄으로써 CPU의 유휴 대역폭을 확보하였으며, 이는 향후 AUTOSAR BSW 태스크를 수용할 수 있는 기반이 됩니다.)*
+**하드웨어 최적화 정량적 지표 (10초 기준 루프 카운트 및 부하 분석):**
+
+| 측정 시나리오 | 메인 루프 회전 수 (Loop Count) | CPU 사용률 (Usage) | CPU 여유 대역폭 (Slack Time) | 엔지니어링 신뢰성 판정 |
+| :--- | :---: | :---: | :---: | :--- |
+| **Baseline** (No Task) | 12.7M 회 | 0% | **100%** | 기준 유휴(Idle) 상태 |
+| **Active** (Wiper Task On) | 4.7M 회 | 약 63% | **37%** | **정상권** (차량용 시스템 제어 안정 margin 70% 이하 충족) |
+
+<details>
+<summary>📊 FreeMASTER 실시간 데이터 그래프 보기</summary>
+
+#### Baseline (No Task) - 12.7M 회
+*<img src="board_notes/07_smart_wiper_CAN_v6/loop_cnt_without_ISR.png" alt="Loop Count Baseline" width="600"/>*
+
+#### Active (Wiper Task On) - 4.7M 회
+*<img src="board_notes/07_smart_wiper_CAN_v6/loop_cnt_with_ISR.png" alt="Loop Count Active" width="600"/>*
+
+*(FreeMASTER DAQ를 통해 10초 동안 메인 루프 카운트를 샘플링하여 아키텍처 변경 후의 실시간 부하 및 여유 대역폭을 데이터로 증명한 결과입니다.)*
+</details>
 
 ### 2. 저오버헤드 DSP 파이프라인
 eDMA가 CPU 개입 없이 ADC 샘플을 메모리로 자동 전송하면, CPU는 정해진 주기 안에서 필터링만 수행합니다. Cortex-M4F 코어의 연산 효율을 극대화하기 위해, 메인 루프 내 평균 연산 시 나눗셈 대신 레지스터 레벨의 비트 우측 시프트 연산(`adcSum >> 3U`)을 사용하여 연산 클럭을 극도로 압축했습니다.
