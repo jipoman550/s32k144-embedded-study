@@ -34,12 +34,27 @@ This project focuses on the architectural paradigm shifts required to ensure the
 
 ## 🔌 Technical Highlights
 
-### 1. Foreground-Background Scheduling (v6)
-To maximize system responsiveness for asynchronous operations (like CAN communication), high-overhead logic was moved to the `while(1)` background loop. The 10ms ISR now strictly handles light event signaling (Flags). This architecture eliminates scheduling jitter and guarantees deterministic behavior.
+### 1. Foreground-Background Scheduling & CPU Load Analysis (v6)
+To maximize system responsiveness, heavy computational control logic was detached from the ISRs and migrated to the `while(1)` background loop. The 10ms ISR now strictly serves to generate light execution flags. The resulting CPU idle bandwidth (Slack Time) was empirically verified by profiling the main loop execution frequency (`loop_cnt`) over a deterministic 10-second window.
 
-> 📊 **Slack Time Analysis (ISR Optimization Effect)**
-> *<img src="board_notes/07_smart_wiper_CAN_v6/loop_cnt_with_ISR.png" alt="Slack Time Comparison" width="600"/>*
-> *(Note: Ensure your actual image path matches your repository structure, e.g., `board_notes/07_smart_wiper_CAN_v6/...`)*
+**Quantitative Performance Metrics (10s Window Execution Summary):**
+
+| Measurement Scenario | Main Loop Rotation (Loop Count) | CPU Usage | CPU Slack Time (Idle Bandwidth) | Engineering Status |
+| :--- | :---: | :---: | :---: | :--- |
+| **Baseline** (No Task) | 12.7M counts | 0% | **100%** | Reference Idle State |
+| **Active** (Wiper Task On) | 4.7M counts | ~63% | **37%** | **Passed** (Within Automotive Safety Margin < 70%) |
+
+<details>
+<summary>📊 View FreeMASTER Real-time DAQ Graphs</summary>
+
+#### Baseline (No Task) - 12.7M Counts
+*<img src="board_notes/07_smart_wiper_CAN_v6/loop_cnt_without_ISR.png" alt="Loop Count Baseline" width="600"/>*
+
+#### Active (Wiper Task On) - 4.7M Counts
+*<img src="board_notes/07_smart_wiper_CAN_v6/loop_cnt_with_ISR.png" alt="Loop Count Active" width="600"/>*
+
+*(Data captured and visualized empirically via FreeMASTER DAQ, proving that the system handles real-time wiper actuation with deterministic margins while leaving sufficient bandwidth for future network tasks.)*
+</details>
 
 ### 2. Low-Overhead DSP Pipeline
 ADC sample accumulation and transfers are entirely automated via eDMA. To minimize execution time within the CPU window, the moving average division is optimized at the register level using bitwise right-shifts (`adcSum >> 3U`), maximizing the efficiency of the Cortex-M4F core.
